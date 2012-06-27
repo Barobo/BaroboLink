@@ -308,7 +308,7 @@ void on_notebook1_switch_page(GtkNotebook* notebook, gpointer page, guint page_n
   mobot_t* mobot;
   /* If the teaching dialog gets selected, we should initialize all connected
    * Mobots to use our custom button handler. */
-  if(page_num == 2) {
+  if(page_num == 1) {
     /* Enable all button handlers */
     for(i = 0; i < g_robotManager->numConnected(); i++) {
       mobot = (mobot_t*)g_robotManager->getMobot(i);
@@ -327,7 +327,7 @@ void on_notebook1_switch_page(GtkNotebook* notebook, gpointer page, guint page_n
 
   /* If the control dialog is selected... */
   GtkWidget *w;
-  if(page_num == 3) {
+  if(page_num == 2) {
     w = GTK_WIDGET(gtk_builder_get_object(g_builder, "combobox_connectedRobots"));
     gtk_combo_box_set_active(GTK_COMBO_BOX(w), selectedRobot);
   } else {

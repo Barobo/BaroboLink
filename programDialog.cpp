@@ -24,6 +24,7 @@ bool g_dirty = false;
 
 void initProgramDialog(void)
 {
+  return;
   /* Attach signal handlers */
   g_signal_connect(G_OBJECT(g_scieditor), SCINTILLA_NOTIFY, G_CALLBACK(on_scintilla_notify), NULL);
   /* Set a monospace font */

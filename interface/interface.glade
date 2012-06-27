@@ -211,6 +211,16 @@
                         <signal name="activate" handler="gtk_widget_show" swapped="no"/>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitem_demoPrograms">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label" translatable="yes">Demo Programs</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_menuitem_demoPrograms_activate" swapped="no"/>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -392,7 +402,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkHButtonBox" id="hbuttonbox5">
+                                  <object class="GtkVButtonBox" id="vbuttonbox2">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <child>
@@ -431,7 +441,6 @@
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
-                                    <property name="pack_type">end</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
