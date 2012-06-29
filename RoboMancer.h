@@ -13,6 +13,10 @@
 #define RAD2DEG(x) ((x)*180.0/M_PI)
 #define DEG2RAD(x) ((x)*M_PI/180.0)
 
+#ifndef _MSYS
+#define MAX_PATH 512
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,6 +40,7 @@ extern pthread_mutex_t g_activeMobotLock;
 #endif
 
 G_MODULE_EXPORT void on_menuitem_demoPrograms_activate(GtkWidget *w, gpointer data);
+G_MODULE_EXPORT void on_menuitem_help_activate(GtkWidget *w, gpointer data);
 /* Connect Dialog */
 G_MODULE_EXPORT void on_button_connect_addRobot_clicked(GtkWidget* widget, gpointer data);
 G_MODULE_EXPORT void on_button_connect_remove_clicked(GtkWidget* widget, gpointer data);
