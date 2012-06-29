@@ -15,10 +15,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#ifndef _MSYS
-#define MAX_PATH 512
-#endif
-
 char *g_curFileName = NULL;
 bool g_dirty = false;
 

@@ -199,3 +199,20 @@ void on_menuitem_demoPrograms_activate(GtkWidget *w, gpointer data)
   }
 #endif
 }
+
+void on_menuitem_help_activate(GtkWidget *w, gpointer data)
+{
+  char chHome[MAX_PATH];
+  char command[MAX_PATH];
+  getChHome(chHome);
+  sprintf(command, "%s\\package\\chmobot\\docs\\index.html", chHome);
+#ifdef _MSYS
+  ShellExecuteA(
+      NULL,
+      "open",
+      command,
+      NULL,
+      NULL,
+      0);
+#endif
+}
