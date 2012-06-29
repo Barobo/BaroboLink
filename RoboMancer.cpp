@@ -113,19 +113,6 @@ int getChHome(char *chhome)
        }
        RegCloseKey(hkResult);
     }
-    else { 
-/*
-      fprintf(stderr, "ERROR: cannot obtain a value for CHHOME\n");
-      fprintf(stderr, "       you may set it using 'option.chhome' in Embedded Ch API Ch_Initialize2(&interp, option)\n");
-*/
-			ChInterp_t interp;
-			Ch_Initialize2(&interp, NULL);
-			strcpy(chhome, Ch_Home(interp));
-			if (chhome == NULL) {
-				retval = -1;
-			}
-			Ch_End(interp);
-    }
   }
   else
     strcpy(chhome, getenv("CHHOME"));
