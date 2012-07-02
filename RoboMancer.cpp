@@ -216,3 +216,21 @@ void on_menuitem_help_activate(GtkWidget *w, gpointer data)
       0);
 #endif
 }
+
+void on_imagemenuitem_about_activate(GtkWidget *widget, gpointer data)
+{
+  /* Find the about dialog and show it */
+  GtkWidget *w;
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "aboutdialog"));
+  gtk_dialog_run(GTK_DIALOG(w));
+}
+
+void on_aboutdialog_response(GtkDialog *dialog, gint response_id, gpointer user_data)
+{
+  gtk_widget_hide(GTK_WIDGET(dialog));
+}
+
+void on_aboutdialog_close(GtkDialog *dialog, gpointer user_data)
+{
+  gtk_widget_hide(GTK_WIDGET(dialog));
+}
