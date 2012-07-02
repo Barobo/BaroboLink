@@ -1398,6 +1398,18 @@ Button A and B together: Clear recorded motions</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
+                                  <object class="GtkLabel" id="label2">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Joint Speed ([0, 120] deg/sec)</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <object class="GtkHBox" id="hbox8">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
@@ -1646,7 +1658,7 @@ Button A and B together: Clear recorded motions</property>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
-                                    <property name="position">0</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -1672,7 +1684,7 @@ Button A and B together: Clear recorded motions</property>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
-                                    <property name="position">1</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>
@@ -1683,7 +1695,7 @@ Button A and B together: Clear recorded motions</property>
                           <object class="GtkLabel" id="label22">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Joint Speeds (0 - 100)&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Joint Speed Control&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                         </child>
@@ -1709,6 +1721,18 @@ Button A and B together: Clear recorded motions</property>
                               <object class="GtkVBox" id="vbox12">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkLabel" id="label6">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Joint Angle ([-180, 180] degrees)</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
                                 <child>
                                   <object class="GtkTable" id="table4">
                                     <property name="visible">True</property>
@@ -1917,7 +1941,7 @@ Button A and B together: Clear recorded motions</property>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
-                                    <property name="position">0</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -1959,7 +1983,7 @@ Button A and B together: Clear recorded motions</property>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
-                                    <property name="position">1</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>
@@ -1970,7 +1994,7 @@ Button A and B together: Clear recorded motions</property>
                           <object class="GtkLabel" id="label27">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Joint Positions&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Joint Position Control&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                         </child>
