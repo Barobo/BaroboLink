@@ -8,6 +8,7 @@
 #include <ScintillaWidget.h>
 #include "RoboMancer.h"
 #include "RobotManager.h"
+#include <sys/stat.h>
 
 GtkBuilder *g_builder;
 GtkWidget *g_window;
@@ -26,11 +27,30 @@ int main(int argc, char* argv[])
   g_builder = gtk_builder_new();
 
   /* Load the UI */
-  if( ! gtk_builder_add_from_file(g_builder, "interface/interface.glade", &error) )
-  {
-    g_warning("%s", error->message);
-    //g_free(error);
-    return -1;
+  /* Find ther interface file */
+  struct stat s;
+  int err;
+  err = stat("interface/interface.glade", &s);
+  if(err == 0) {
+    if( ! gtk_builder_add_from_file(g_builder, "interface/interface.glade", &error) )
+    {
+      g_warning("%s", error->message);
+      //g_free(error);
+      return -1;
+    }
+  } else {
+    err = stat("interface.glade", &s);
+    if(err == 0) {
+      if( ! gtk_builder_add_from_file(g_builder, "interface.glade", &error) )
+      {
+        g_warning("%s", error->message);
+        //g_free(error);
+        return -1;
+      }
+    } else {
+      fprintf(stderr, "Could not find interface.glade!\n");
+      return -1;
+    }
   }
 
   /* Initialize the subsystem */

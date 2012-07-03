@@ -64,3 +64,10 @@ pkg:
 	cp dll/* RoboMancer-v$(VERSION)/
 #cp mobot.dll RoboMancer-v$(VERSION)/
 	cp -R interface RoboMancer-v$(VERSION)/
+
+chpkg:
+	rm -rf RoboMancer-bin
+	mkdir RoboMancer-bin
+	cp RoboMancer.exe RoboMancer-bin
+	cp dll/* RoboMancer-bin
+	cp interface/* RoboMancer-bin
