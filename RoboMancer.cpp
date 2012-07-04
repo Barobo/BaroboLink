@@ -254,3 +254,4 @@ void on_aboutdialog_close(GtkDialog *dialog, gpointer user_data)
 {
   gtk_widget_hide(GTK_WIDGET(dialog));
 }
+

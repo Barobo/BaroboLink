@@ -106,6 +106,11 @@ gboolean controllerHandlerTimeout(gpointer data)
   }
   /* Get the controlled mobot */
   mobot = g_robotManager->getMobot(index);
+  if(mobot == NULL) {
+    g_robotManager->disconnect(index);
+    g_activeMobot = NULL;
+    return true;
+  }
   if(mobot != g_activeMobot) {
     MUTEX_LOCK(&g_activeMobotLock);
     g_activeMobot = mobot;
@@ -181,7 +186,7 @@ void* controllerHandlerThread(void* arg)
     }
 
     TESTLOCK
-    Mobot_getJointAngles(
+    int rc = Mobot_getJointAngles(
         (mobot_t*)g_activeMobot,
         &g_positionValues[0],
         &g_positionValues[1],
