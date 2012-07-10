@@ -216,7 +216,7 @@ void* controllerHandlerThread(void* arg)
 
 int handlerZERO(void* arg)
 {
-  Mobot_moveToZero((mobot_t*)arg);
+  Mobot_resetToZero((mobot_t*)arg);
 }
 
 #define HANDLER_FORWARD(n) \
