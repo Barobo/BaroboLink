@@ -23,6 +23,7 @@ class CRobotManager : public ConfigFile
     int numConnected();
     int numAvailable();
     void record();
+    int remove(int index);
     void addDelay(double seconds);
     void play();
     recordMobot_t* getMobot(int connectIndex);
@@ -30,9 +31,6 @@ class CRobotManager : public ConfigFile
     bool _isPlaying;
   private:
     recordMobot_t *_mobots[MAX_CONNECTED];
-    /* _connectAddresses is an array of pointers to 
-       ConfigFile::_addresses */
-    char *_connectedAddresses[MAX_CONNECTED];
 };
 
 #endif

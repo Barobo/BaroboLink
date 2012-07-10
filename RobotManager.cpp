@@ -8,7 +8,6 @@ CRobotManager::CRobotManager()
   int i;
   for(i = 0; i < MAX_CONNECTED; i++) {
     _mobots[i] = NULL;
-    _connectedAddresses[i] = NULL;
   }
   _isPlaying = false;
 }
@@ -49,8 +48,6 @@ int CRobotManager::connectIndex(int index)
   Mobot_setJointSpeedRatios((mobot_t*)mobot, 1, 1, 1, 1);
   /* Insert the newly connected robot to the bottom of the list. */
   _mobots[index] = mobot;
-  _connectedAddresses[numConnected()] = 
-	  _addresses[index];
   return err;
 }
 
@@ -104,6 +101,19 @@ void CRobotManager::record()
   for(i = 0; i < numConnected(); i++) {
     mobot = getMobot(i);
     RecordMobot_record(mobot);
+  }
+}
+
+int CRobotManager::remove(int index)
+{
+  int rc = ConfigFile::remove(index);
+  if(rc < 0) { return rc; }
+  /* Shift the mobot arrays, disconnect if necessary */
+  if(isConnected(index)) {
+    disconnect(index);
+  }
+  for(int i = MAX_CONNECTED-1; i >= index; i--) {
+    _mobots[i] = _mobots[i+1];
   }
 }
 
