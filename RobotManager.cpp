@@ -45,7 +45,6 @@ int CRobotManager::connectIndex(int index)
   if(err = Mobot_connectWithAddress( (mobot_t*)mobot, getEntry(index), 1 )) {
     return err;
   }
-  Mobot_setJointSpeedRatios((mobot_t*)mobot, 1, 1, 1, 1);
   /* Insert the newly connected robot to the bottom of the list. */
   _mobots[index] = mobot;
   return err;
