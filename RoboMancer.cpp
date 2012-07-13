@@ -17,10 +17,11 @@ ScintillaObject *g_sci;
 
 CRobotManager *g_robotManager;
 
-const char *g_interfaceFiles[80] = {
+char *g_interfaceFiles[80] = {
   "interface/interface.glade",
   "interface.glade",
   "../share/RoboMancer/interface.glade",
+  NULL,
   NULL
 };
 
@@ -32,6 +33,14 @@ int main(int argc, char* argv[])
 
   /* Create the GTK Builder */
   g_builder = gtk_builder_new();
+
+#ifdef __MACH__
+  char *datadir = getenv("XDG_DATA_DIRS");
+  if(datadir != NULL) {
+    g_interfaceFiles[3] = (char*)malloc(sizeof(char)*512);
+    sprintf(g_interfaceFiles[3], "%s/RoboMancer/interface.glade", datadir);
+  }
+#endif
 
   /* Load the UI */
   /* Find ther interface file */
