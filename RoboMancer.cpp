@@ -17,6 +17,13 @@ ScintillaObject *g_sci;
 
 CRobotManager *g_robotManager;
 
+const char *g_interfaceFiles[80] = {
+  "interface/interface.glade",
+  "interface.glade",
+  "../share/RoboMancer/interface.glade",
+  NULL
+};
+
 int main(int argc, char* argv[])
 {
   GError *error = NULL;
@@ -30,29 +37,26 @@ int main(int argc, char* argv[])
   /* Find ther interface file */
   struct stat s;
   int err;
-  err = stat("interface/interface.glade", &s);
-  if(err == 0) {
-    if( ! gtk_builder_add_from_file(g_builder, "interface/interface.glade", &error) )
-    {
-      g_warning("%s", error->message);
-      //g_free(error);
-      return -1;
-    }
-  } else {
-    err = stat("interface.glade", &s);
+  int i;
+  for(i = 0; g_interfaceFiles[i] != NULL; i++) {
+    err = stat(g_interfaceFiles[i], &s);
     if(err == 0) {
-      if( ! gtk_builder_add_from_file(g_builder, "interface.glade", &error) )
+      if( ! gtk_builder_add_from_file(g_builder, g_interfaceFiles[i], &error) )
       {
         g_warning("%s", error->message);
         //g_free(error);
         return -1;
+      } else {
+        break;
       }
-    } else {
-      fprintf(stderr, "Could not find interface.glade!\n");
-      return -1;
     }
   }
 
+  if(g_interfaceFiles[i] == NULL) {
+    /* Could not find the interface file */
+    g_warning("Could not find interface file.");
+    return -1;
+  }
   /* Initialize the subsystem */
   initialize();
 
