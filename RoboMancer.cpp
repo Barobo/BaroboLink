@@ -225,8 +225,8 @@ void on_menuitem_help_activate(GtkWidget *w, gpointer data)
   char chHome[MAX_PATH];
   char command[MAX_PATH];
   getChHome(chHome);
-  sprintf(command, "%s\\package\\chmobot\\docs\\index.html", chHome);
 #ifdef _MSYS
+  sprintf(command, "%s\\package\\chmobot\\docs\\index.html", chHome);
   ShellExecuteA(
       NULL,
       "open",
@@ -234,6 +234,9 @@ void on_menuitem_help_activate(GtkWidget *w, gpointer data)
       NULL,
       NULL,
       0);
+#elif defined (__MACH__)
+  sprintf(command, "open %s/package/chmobot/docs/index.html", chHome);
+  system(command); 
 #endif
 }
 
