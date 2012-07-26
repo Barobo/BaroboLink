@@ -206,6 +206,7 @@ void on_liststore_availableRobots_row_deleted(
   if(g_dndConnect) {
     indices = gtk_tree_path_get_indices_with_depth(path, &depth);
     index = indices[0];
+    g_robotManager->moveMobot(g_robotManager->_newDndIndex, index);
     g_robotManager->remove(index);
     g_robotManager->write();
   }
@@ -229,6 +230,7 @@ void on_liststore_availableRobots_row_inserted(
       addr = strdup("00:00:00:00:00:00");
     }
     g_robotManager->insertEntry(addr, index);
+    g_robotManager->_newDndIndex = index;
     free(addr);
     g_robotManager->write();
   }

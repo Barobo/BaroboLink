@@ -27,6 +27,40 @@ bool CRobotManager::isConnected(int index)
   return Mobot_isConnected((mobot_t*)_mobots[index]);
 }
 
+int CRobotManager::addEntry(const char* entry)
+{
+  int rc;
+  if(rc = ConfigFile::addEntry(entry)) {
+    return rc;
+  }
+
+  /* Adjust the array of mobots */
+  for(int i = (numEntries()-1); i >= 0; i--) {
+    _mobots[i+1] = _mobots[i];
+  }
+}
+
+void CRobotManager::moveMobot(int destIndex, int srcIndex)
+{
+  _mobots[destIndex] = _mobots[srcIndex];
+  _mobots[srcIndex] = NULL;
+}
+
+int CRobotManager::insertEntry(const char* entry, int index)
+{
+  int rc;
+  if(rc = ConfigFile::insertEntry(entry, index)) {
+    return rc;
+  }
+  /* Move the existing mobot array */
+  int i;
+  for(i = numEntries(); i >= index; i--) {
+    _mobots[i+1] = _mobots[i];
+  }
+  _mobots[index] = NULL;
+  return 0;
+}
+
 bool CRobotManager::isPlaying()
 {
   return _isPlaying;
@@ -105,15 +139,26 @@ void CRobotManager::record()
 
 int CRobotManager::remove(int index)
 {
-  int rc = ConfigFile::remove(index);
-  if(rc < 0) { return rc; }
-  /* Shift the mobot arrays, disconnect if necessary */
-  if(isConnected(index)) {
-    disconnect(index);
+  int rc;
+  if(rc = ConfigFile::remove(index)) {
+    return rc;
   }
-  for(int i = MAX_CONNECTED-1; i >= index; i--) {
+  /* Adjust the list of mobots */
+  _tmpMobot = _mobots[index];
+  int i;
+  for(i = index; i < numEntries(); i++) {
     _mobots[i] = _mobots[i+1];
   }
+  return 0;
+}
+
+void CRobotManager::restoreSavedMobot(int index)
+{
+  if(_mobots[index] != NULL) {
+    free(_mobots[index]);
+  }
+  _mobots[index] = _tmpMobot;
+  _tmpMobot = NULL;
 }
 
 void CRobotManager::addDelay(double seconds)
