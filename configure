@@ -4293,16 +4293,19 @@ if test -n "$DEPS_CFLAGS"; then
     if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0\""; } >&5
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration\""; } >&5
   ($PKG_CONFIG --exists --print-errors "
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0") 2>&5
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_DEPS_CFLAGS=`$PKG_CONFIG --cflags "
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0" 2>/dev/null`
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -4315,16 +4318,19 @@ if test -n "$DEPS_LIBS"; then
     if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0\""; } >&5
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration\""; } >&5
   ($PKG_CONFIG --exists --print-errors "
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0") 2>&5
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_DEPS_LIBS=`$PKG_CONFIG --libs "
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0" 2>/dev/null`
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -4346,18 +4352,21 @@ fi
         if test $_pkg_short_errors_supported = yes; then
 	        DEPS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0" 2>&1`
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration" 2>&1`
         else
 	        DEPS_PKG_ERRORS=`$PKG_CONFIG --print-errors "
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0" 2>&1`
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$DEPS_PKG_ERRORS" >&5
 
 	as_fn_error $? "Package requirements (
                    gtk+-2.0 >= 2.20.0
-                   gmodule-export-2.0 >= 2.20.0) were not met:
+                   gmodule-export-2.0 >= 2.20.0
+                   gtk-mac-integration) were not met:
 
 $DEPS_PKG_ERRORS
 
@@ -4442,7 +4451,7 @@ if ${ac_cv_lib_scintilla_scintilla_new+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lscintilla -lgtk-quartz-2.0 -lgdk-quartz-2.0 -latk-1.0 -lgio-2.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lcairo -lgmodule-2.0 -lgobject-2.0 -lglib-2.0 -lintl -lstdc++ $LIBS"
+LIBS="-lscintilla -lgtk-quartz-2.0 -lgdk-quartz-2.0 -latk-1.0 -lgio-2.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lcairo -lgmodule-2.0 -lgobject-2.0 -lglib-2.0 -lgthread-2.0 -lintl -lstdc++ $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
