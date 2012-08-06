@@ -26,7 +26,11 @@ void RecordMobot_destroy(recordMobot_t* mobot)
 int RecordMobot_connectWithAddress(recordMobot_t* mobot, const char address[], int channel)
 {
   strcpy(mobot->address, address);
+#ifndef __MACH__
   return Mobot_connectWithAddress((mobot_t*)mobot, address, channel);
+#else
+  return Mobot_connectWithAddressTTY((mobot_t*)mobot, address);
+#endif
 }
 
 const char* RecordMobot_getAddress(recordMobot_t* mobot)

@@ -17,6 +17,14 @@ ScintillaObject *g_sci;
 
 CRobotManager *g_robotManager;
 
+char *g_interfaceFiles[80] = {
+  "interface/interface.glade",
+  "interface.glade",
+  "../share/RoboMancer/interface.glade",
+  NULL,
+  NULL
+};
+
 int main(int argc, char* argv[])
 {
   GError *error = NULL;
@@ -26,33 +34,38 @@ int main(int argc, char* argv[])
   /* Create the GTK Builder */
   g_builder = gtk_builder_new();
 
+#ifdef __MACH__
+  char *datadir = getenv("XDG_DATA_DIRS");
+  if(datadir != NULL) {
+    g_interfaceFiles[3] = (char*)malloc(sizeof(char)*512);
+    sprintf(g_interfaceFiles[3], "%s/RoboMancer/interface.glade", datadir);
+  }
+#endif
+
   /* Load the UI */
   /* Find ther interface file */
   struct stat s;
   int err;
-  err = stat("interface/interface.glade", &s);
-  if(err == 0) {
-    if( ! gtk_builder_add_from_file(g_builder, "interface/interface.glade", &error) )
-    {
-      g_warning("%s", error->message);
-      //g_free(error);
-      return -1;
-    }
-  } else {
-    err = stat("interface.glade", &s);
+  int i;
+  for(i = 0; g_interfaceFiles[i] != NULL; i++) {
+    err = stat(g_interfaceFiles[i], &s);
     if(err == 0) {
-      if( ! gtk_builder_add_from_file(g_builder, "interface.glade", &error) )
+      if( ! gtk_builder_add_from_file(g_builder, g_interfaceFiles[i], &error) )
       {
         g_warning("%s", error->message);
         //g_free(error);
         return -1;
+      } else {
+        break;
       }
-    } else {
-      fprintf(stderr, "Could not find interface.glade!\n");
-      return -1;
     }
   }
 
+  if(g_interfaceFiles[i] == NULL) {
+    /* Could not find the interface file */
+    g_warning("Could not find interface file.");
+    return -1;
+  }
   /* Initialize the subsystem */
   initialize();
 
@@ -225,8 +238,8 @@ void on_menuitem_help_activate(GtkWidget *w, gpointer data)
   char chHome[MAX_PATH];
   char command[MAX_PATH];
   getChHome(chHome);
-  sprintf(command, "%s\\package\\chmobot\\docs\\index.html", chHome);
 #ifdef _MSYS
+  sprintf(command, "%s\\package\\chmobot\\docs\\index.html", chHome);
   ShellExecuteA(
       NULL,
       "open",
@@ -234,6 +247,9 @@ void on_menuitem_help_activate(GtkWidget *w, gpointer data)
       NULL,
       NULL,
       0);
+#elif defined (__MACH__)
+  sprintf(command, "open %s/package/chmobot/docs/index.html", chHome);
+  system(command); 
 #endif
 }
 
