@@ -10,6 +10,11 @@
 #include "RobotManager.h"
 #include <sys/stat.h>
 
+#ifdef __MACH__
+#include <gtk-mac-integration.h>
+//#include <gtkosxapplication.h>
+#endif
+
 GtkBuilder *g_builder;
 GtkWidget *g_window;
 GtkWidget *g_scieditor;
@@ -73,6 +78,13 @@ int main(int argc, char* argv[])
   g_window = GTK_WIDGET( gtk_builder_get_object(g_builder, "window1"));
   /* Connect signals */
   gtk_builder_connect_signals(g_builder, NULL);
+#ifdef __MACH__
+  //g_signal_connect(GtkOSXMacmenu, "NSApplicationBlockTermination",
+      //G_CALLBACK(app_should_quit_cb), NULL);
+  GtkWidget* quititem = GTK_WIDGET(gtk_builder_get_object(g_builder, "imagemenuitem5"));
+  gtk_mac_menu_set_quit_menu_item(GTK_MENU_ITEM(quititem));
+#endif
+
   /* Show the window */
   gtk_widget_show(g_window);
   gtk_main();
