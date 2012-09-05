@@ -37,6 +37,16 @@ enum gaits_e{
   NUM_GAITS
 };
 
+double normalizeDeg(double deg) {
+  while(deg >= 180) {
+    deg -= 360;
+  }
+  while (deg < -180) {
+    deg += 360;
+  }
+  return deg;
+}
+
 void initControlDialog(void)
 {
 #define BUTTON(x) \
@@ -116,11 +126,15 @@ gboolean controllerHandlerTimeout(gpointer data)
     g_activeMobot = mobot;
     MUTEX_UNLOCK(&g_activeMobotLock);
   }
+  char buf[80];
 #define VSCALEHANDLER(n) \
   if(g_buttonState[S_POS##n] == 0) { \
     w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorPos" #n)); \
-    gtk_range_set_value(GTK_RANGE(w), g_positionValues[n-1]); \
-  }
+    gtk_range_set_value(GTK_RANGE(w), normalizeDeg(g_positionValues[n-1])); \
+  } \
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "label_motorPos" #n)); \
+  sprintf(buf, "%.2lf", g_positionValues[n-1]); \
+  gtk_label_set_text(GTK_LABEL(w), buf); 
   VSCALEHANDLER(1)
     VSCALEHANDLER(2)
     VSCALEHANDLER(3)
@@ -134,7 +148,10 @@ gboolean controllerHandlerTimeout(gpointer data)
           &angles[3]);
 #define VSCALEHANDLER(n) \
       w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorspeed" #n)); \
-      gtk_range_set_value(GTK_RANGE(w), RAD2DEG(angles[n-1])); 
+      gtk_range_set_value(GTK_RANGE(w), RAD2DEG(angles[n-1]));  \
+      w = GTK_WIDGET(gtk_builder_get_object(g_builder, "label_motorPos" #n)); \
+      sprintf(buf, "%.2lf", RAD2DEG(angles[n-1])); \
+      gtk_label_set_text(GTK_LABEL(w), buf);
       VSCALEHANDLER(1)
         VSCALEHANDLER(2)
         VSCALEHANDLER(3)
@@ -262,25 +279,33 @@ HANDLER_STOP(4)
 
 int handlerROLLFORWARD(void* arg)
 {
-  Mobot_motionRollForwardNB((mobot_t*)arg, DEG2RAD(90));
+  //Mobot_motionRollForwardNB((mobot_t*)arg, DEG2RAD(90));
+  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT1, MOBOT_FORWARD);
+  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT4, MOBOT_FORWARD);
   return 0;
 }
 
 int handlerTURNLEFT(void* arg)
 {
-  Mobot_motionTurnLeftNB((mobot_t*)arg, DEG2RAD(90));
+  //Mobot_motionTurnLeftNB((mobot_t*)arg, DEG2RAD(90));
+  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT1, MOBOT_BACKWARD);
+  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT4, MOBOT_FORWARD);
   return 0;
 }
 
 int handlerTURNRIGHT(void* arg)
 {
-  Mobot_motionTurnRightNB((mobot_t*)arg, DEG2RAD(90));
+  //Mobot_motionTurnRightNB((mobot_t*)arg, DEG2RAD(90));
+  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT1, MOBOT_FORWARD);
+  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT4, MOBOT_BACKWARD);
   return 0;
 }
 
 int handlerROLLBACK(void* arg)
 {
-  Mobot_motionRollBackwardNB((mobot_t*)arg, DEG2RAD(90));
+  //Mobot_motionRollBackwardNB((mobot_t*)arg, DEG2RAD(90));
+  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT1, MOBOT_BACKWARD);
+  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT4, MOBOT_BACKWARD);
   return 0;
 }
 
