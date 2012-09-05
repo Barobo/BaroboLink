@@ -280,32 +280,28 @@ HANDLER_STOP(4)
 int handlerROLLFORWARD(void* arg)
 {
   //Mobot_motionRollForwardNB((mobot_t*)arg, DEG2RAD(90));
-  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT1, MOBOT_FORWARD);
-  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT4, MOBOT_FORWARD);
+  Mobot_moveContinuousNB((mobot_t*)arg, MOBOT_FORWARD, MOBOT_HOLD, MOBOT_HOLD, MOBOT_FORWARD);
   return 0;
 }
 
 int handlerTURNLEFT(void* arg)
 {
   //Mobot_motionTurnLeftNB((mobot_t*)arg, DEG2RAD(90));
-  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT1, MOBOT_BACKWARD);
-  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT4, MOBOT_FORWARD);
+  Mobot_moveContinuousNB((mobot_t*)arg, MOBOT_BACKWARD, MOBOT_HOLD, MOBOT_HOLD, MOBOT_FORWARD);
   return 0;
 }
 
 int handlerTURNRIGHT(void* arg)
 {
   //Mobot_motionTurnRightNB((mobot_t*)arg, DEG2RAD(90));
-  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT1, MOBOT_FORWARD);
-  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT4, MOBOT_BACKWARD);
+  Mobot_moveContinuousNB((mobot_t*)arg, MOBOT_FORWARD, MOBOT_HOLD, MOBOT_HOLD, MOBOT_BACKWARD);
   return 0;
 }
 
 int handlerROLLBACK(void* arg)
 {
   //Mobot_motionRollBackwardNB((mobot_t*)arg, DEG2RAD(90));
-  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT1, MOBOT_BACKWARD);
-  Mobot_moveJointContinuousNB((mobot_t*)arg, MOBOT_JOINT4, MOBOT_BACKWARD);
+  Mobot_moveContinuousNB((mobot_t*)arg, MOBOT_BACKWARD, MOBOT_HOLD, MOBOT_HOLD, MOBOT_BACKWARD);
   return 0;
 }
 
