@@ -35,10 +35,12 @@ typedef struct stkComms_s
 
 #if !defined (_MSYS)
 #ifndef _WIN32
-  struct sockaddr_rc addr;
+  struct sockaddr_rc* addr;
 #else
-  SOCKADDR_BTH addr;
+  SOCKADDR_BTH* addr;
 #endif
+#else
+  void* addr;
 #endif
 } stkComms_t;
 #else
