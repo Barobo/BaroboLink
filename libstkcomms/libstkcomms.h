@@ -4,8 +4,12 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifndef __MACH__
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
+#else
+#include <stdint.h>
+#endif
 #else
 #include <winsock2.h>
 //#include <winsock2.h>
@@ -32,12 +36,15 @@ typedef struct stkComms_s
   MUTEX_T* progressLock;
   COND_T* progressCond;
   double progress;
+  char* lockfileName;
 
 #if !defined (_MSYS)
-#ifndef _WIN32
-  struct sockaddr_rc* addr;
+#ifdef _WIN32
+  SOCKADDR_BTH addr;
+#elif defined __MACH__
+  void* addr;
 #else
-  SOCKADDR_BTH* addr;
+  struct sockaddr_rc addr;
 #endif
 #else
   void* addr;
@@ -65,6 +72,8 @@ stkComms_t* stkComms_new();
 int stkComms_init(stkComms_t* comms);
 int stkComms_destroy(stkComms_t* comms);
 int stkComms_connect(stkComms_t* comms, const char addr[]);
+int stkComms_connectWithAddressTTY(stkComms_t* comms, const char* address);
+int stkComms_connectWithTTY(stkComms_t* comms, const char* ttyfilename);
 int stkComms_disconnect(stkComms_t* comms);
 int stkComms_setSocket(stkComms_t* comms, int socket);
 double stkComms_getProgress(stkComms_t* comms);

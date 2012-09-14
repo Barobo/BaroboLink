@@ -36,7 +36,11 @@ CStkComms::~CStkComms()
 
 int CStkComms::connect(const char addr[])
 {
+#ifndef __MACH__
   return stkComms_connect(_comms, addr);
+#else
+  return stkComms_connectWithAddressTTY(_comms, addr);
+#endif
 }
 
 int CStkComms::disconnect()
@@ -96,22 +100,27 @@ int CStkComms::programAll(const char* hexFileName, int hwRev)
 {
   if(handshake()) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
   if(setDevice()) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
   if(setDeviceExt()) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
   if(enterProgMode()) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
   if(checkSignature()) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
   /*
@@ -122,18 +131,22 @@ int CStkComms::programAll(const char* hexFileName, int hwRev)
   */
   if(progFuses()) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
   if(progHexFile(hexFileName)) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
   if(checkFlash(hexFileName)) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
   if(leaveProgMode()) {
     THROW;
+    printf("programming failed %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
 	stkComms_setProgress(_comms, 1.1);
