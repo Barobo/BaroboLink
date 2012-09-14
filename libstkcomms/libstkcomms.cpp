@@ -2,8 +2,12 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 #ifndef _WIN32
 #include <sys/ioctl.h>
+#include <libgen.h>
+#include <sys/types.h>
+#include <signal.h>
 #else
 #pragma comment(lib, "ws2_32.lib")
 #include <winsock2.h>
@@ -13,13 +17,12 @@
 #include "command.h"
 #include "../thread_macros.h"
 
-//#define DEBUG
 
-#ifdef DEBUG
-#define THROW throw
-#else
+//#ifdef DEBUG
+//#define THROW throw
+//#else
 #define THROW
-#endif
+//#endif
 
 stkComms_t* stkComms_new()
 {
@@ -57,6 +60,7 @@ int stkComms_destroy(stkComms_t* comms)
 
 int stkComms_connect(stkComms_t* comms, const char addr[])
 {
+#ifndef __MACH__
   int err = 0;
   int flags;
 #ifndef _WIN32
@@ -147,17 +151,102 @@ int stkComms_connect(stkComms_t* comms, const char addr[])
   sleep(1);
   stkComms_setdtr(comms, 0);
 #else
-  ioctlsocket(comms->socket, FIONBIO, (u_long*)1);
+  u_long val = 1;
+  err = ioctlsocket(comms->socket, FIONBIO, &val);
+  if(err) {
+    printf("ioctlsocket failed %d\n", WSAGetLastError());
+  }
 #endif
   return 0;
+#else 
+  return -1;
+#endif
 }
+
+#ifdef __MACH__
+int stkComms_connectWithAddressTTY(stkComms_t* comms, const char* address)
+{
+  char buf[80];
+  char chunk1[3];
+  char chunk2[3];
+  sscanf(address, "%*c%*c:%*c%*c:%*c%*c:%*c%*c:%c%c:%c%c", 
+      &chunk1[0], &chunk1[1],
+      &chunk2[0], &chunk2[1]);
+  chunk1[2] = '\0';
+  chunk2[2] = '\0';
+  sprintf(buf, "/dev/tty.MOBOT-%s%s-SPP", chunk1, chunk2);
+  return stkComms_connectWithTTY(comms, buf);
+}
+
+#define MAX_PATH 1024
+int stkComms_connectWithTTY(stkComms_t* comms, const char* ttyfilename)
+{
+  FILE *lockfile;
+  char *filename = strdup(ttyfilename);
+  char lockfileName[MAX_PATH];
+  int pid;
+  int status;
+  /* Open the lock file, if it exists */
+  sprintf(lockfileName, "/tmp/%s.lock", basename(filename));
+  lockfile = fopen(lockfileName, "r");
+  if(lockfile == NULL) {
+    /* Lock file does not exist. Proceed. */
+    comms->lockfileName = strdup(lockfileName);
+  } else {
+    /* Lockfile exists. Need to check PID in the lock file and see if that
+     * process is still running. */
+    fscanf(lockfile, "%d", &pid);
+    if(pid > 0 && kill(pid,0) < 0 && errno == ESRCH) {
+      /* Lock file is stale. Delete it */
+      unlink(lockfileName);
+    } else {
+      /* The tty device is locked. Return error code. */
+      fprintf(stderr, "Error: Another application is already connected to the Mobot.\n");
+      free(filename);
+      fclose(lockfile);
+      return -2;
+    }
+  }
+  fclose(lockfile);
+  comms->socket = open(ttyfilename, O_RDWR | O_NOCTTY );
+  if(comms->socket < 0) {
+    perror("Unable to open tty port.");
+    return -1;
+  }
+  comms->isConnected = 1;
+  /* Make the socket non-blocking */
+#ifndef _WIN32
+  unsigned int flags;
+  flags = fcntl(comms->socket, F_GETFL, 0);
+  fcntl(comms->socket, F_SETFL, flags | O_NONBLOCK);
+#endif
+  /* Finished connecting. Create the lockfile. */
+  lockfile = fopen(lockfileName, "w");
+  if(lockfile == NULL) {
+    fprintf(stderr, "Fatal error. %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+  fprintf(lockfile, "%d", getpid());
+  fclose(lockfile);
+  return 0;
+}
+#endif
 
 int stkComms_disconnect(stkComms_t* comms)
 {
+#ifdef __MACH__
+  if(comms->lockfileName != NULL) {
+    unlink(comms->lockfileName);
+    free(comms->lockfileName);
+    comms->lockfileName = NULL;
+  }
+  return close(comms->socket);
+#else
 #ifndef _WIN32
   return close(comms->socket);
 #else
   return closesocket(comms->socket);
+#endif
 #endif
 }
 
@@ -430,7 +519,7 @@ int stkComms_loadAddress(stkComms_t* comms, uint16_t address)
 int stkComms_progHexFile(stkComms_t* comms, const char* filename)
 {
   hexFile_t* file = hexFile_new();
-  hexFile_init(file);
+  hexFile_init2(file, filename);
   uint16_t pageSize = 128;
   int i;
   /* Program the file one 128-byte page at a time */
@@ -463,7 +552,7 @@ int stkComms_progHexFile(stkComms_t* comms, const char* filename)
 int stkComms_checkFlash(stkComms_t* comms, const char* filename)
 {
   hexFile_t* hf = hexFile_new();
-  hexFile_init(hf);
+  hexFile_init2(hf, filename);
   int i;
   uint16_t addrIncr = 0x40;
   uint16_t pageSize = 0x80;
@@ -663,7 +752,7 @@ int stkComms_recvBytes(stkComms_t* comms, uint8_t* buf, size_t expectedBytes, si
 #ifndef _WIN32
     rc = read(comms->socket, mybuf, size);
 #else
-    rc = recvfrom(comms->socket, (char*)mybuf, 1, 0, (struct sockaddr*)0, 0);
+    rc = recvfrom(comms->socket, (char*)mybuf, size, 0, (struct sockaddr*)0, 0);
 #endif
     if(rc > 0) {
       memcpy(&buf[len], mybuf, rc);
@@ -692,8 +781,9 @@ int stkComms_recvBytes2(stkComms_t* comms, uint8_t* buf, size_t size)
 #ifndef _WIN32
   len = read(comms->socket, buf, size);
 #else
-
+  len = recvfrom(comms->socket, (char*)buf, size, 0, (struct sockaddr*)0, 0);
 #endif
+
 #ifdef DEBUG
   printf("Recv: ");
   for(int i = 0; i < len; i++) {
