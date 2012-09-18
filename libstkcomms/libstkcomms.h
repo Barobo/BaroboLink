@@ -46,8 +46,6 @@ typedef struct stkComms_s
 #else
   struct sockaddr_rc addr;
 #endif
-#else
-  void* addr;
 #endif
 } stkComms_t;
 #else

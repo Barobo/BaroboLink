@@ -165,7 +165,7 @@ void on_button_reflashContinue_clicked(GtkWidget* widget, gpointer data)
    * listening socket */
   /* Set the button insensitive */
   gtk_widget_set_sensitive(widget, FALSE);
-  gtk_button_set_label(GTK_BUTTON(widget, "Continue"));
+  gtk_button_set_label(GTK_BUTTON(widget), "Continue");
   /* Set the cancel button to not-sensitive too */
   GtkWidget *cancelButton = (GTK_WIDGET(gtk_builder_get_object(g_builder, "button_cancelFlash2")));
   gtk_widget_set_sensitive(cancelButton, FALSE);
