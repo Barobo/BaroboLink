@@ -32,15 +32,6 @@ stkComms_t* stkComms_new()
 
 int stkComms_init(stkComms_t* comms)
 {
-#ifndef __MACH__
-#ifndef _WIN32
-  comms->addr = (struct sockaddr_rc*)malloc(sizeof(struct sockaddr_rc));
-  memset(comms->addr, 0, sizeof(struct sockaddr_rc));
-#else
-  comms->addr = (SOCKADDR_BTH*)malloc(sizeof(SOCKADDR_BTH));
-  memset(comms->addr, 0, sizeof(SOCKADDR_BTH));
-#endif
-#endif
   comms->isConnected = false;
   comms->programComplete = 0;
   MUTEX_NEW(comms->progressLock);
@@ -86,13 +77,13 @@ int stkComms_connect(stkComms_t* comms, const char addr[])
 #endif
   // set the connection parameters (who to connect to)
 #ifndef _WIN32
-  comms->addr->rc_family = AF_BLUETOOTH;
-  comms->addr->rc_channel = (uint8_t) channel;
-  str2ba( addr, &comms->addr->rc_bdaddr );
+  comms->addr.rc_family = AF_BLUETOOTH;
+  comms->addr.rc_channel = (uint8_t) 1;
+  str2ba( addr, &comms->addr.rc_bdaddr );
 #else
-  comms->addr->addressFamily = AF_BTH;
-  str2ba( addr, (bdaddr_t*)&comms->addr->btAddr);
-  comms->addr->port = 1;
+  comms->addr.addressFamily = AF_BTH;
+  str2ba( addr, (bdaddr_t*)&comms->addr.btAddr);
+  comms->addr.port = 1;
 #endif
 
   // connect to server
@@ -103,7 +94,7 @@ int stkComms_connect(stkComms_t* comms, const char addr[])
     if(tries > 2) {
       break;
     }
-    status = connect(comms->socket, (const struct sockaddr *)comms->addr, sizeof(*comms->addr));
+    status = ::connect(comms->socket, (const struct sockaddr *)&comms->addr, sizeof(comms->addr));
     if(status == 0) {
       comms->isConnected = 1;
     } 
