@@ -54,7 +54,6 @@ int main(int argc, char* argv[])
   for(i = 0; g_interfaceFiles[i] != NULL; i++) {
     err = stat(g_interfaceFiles[i], &s);
     if(err == 0) {
-      printf("%d:%s\n", i, g_interfaceFiles[i]);
       if( ! gtk_builder_add_from_file(g_builder, g_interfaceFiles[i], &error) )
       {
         g_warning("%s", error->message);
@@ -101,6 +100,7 @@ void initialize()
   refreshConnectDialog();
   //g_timeout_add(1000, connectDialogPulse, NULL);
 
+  g_notebookRoot = GTK_NOTEBOOK(gtk_builder_get_object(g_builder, "notebook_root"));
   initControlDialog();
   initProgramDialog();
   initializeComms();
