@@ -39,6 +39,8 @@ extern pthread_mutex_t g_activeMobotLock;
 #endif
 extern GtkNotebook *g_notebookRoot;
 extern GtkSpinner* g_reflashConnectSpinner;
+G_MODULE_EXPORT void on_menuitem_demoPrograms_activate(GtkWidget *w, gpointer data);
+G_MODULE_EXPORT void on_menuitem_help_activate(GtkWidget *w, gpointer data);
 G_MODULE_EXPORT void on_imagemenuitem_about_activate(GtkWidget *w, gpointer data);
 G_MODULE_EXPORT void on_aboutdialog_response(GtkDialog *dialog, gint response_id, gpointer user_data);
 G_MODULE_EXPORT void on_aboutdialog_close(GtkDialog *dialog, gpointer user_data);
