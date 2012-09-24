@@ -156,7 +156,7 @@ void on_button_saveToProgram_clicked(GtkWidget*widget, gpointer data)
       GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
       NULL);
   gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (dialog), TRUE);
-  gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (dialog), "UntitledDocument.cpp");
+  gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (dialog), "UntitledDocument.ch");
   if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
   {
     char *filename;
