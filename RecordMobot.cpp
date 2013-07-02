@@ -78,15 +78,18 @@ int RecordMobot_record(recordMobot_t* mobot)
 {
 	/* Get the robots positions */
   char *poseName;
+  int i;
 	double angles[4];
+  char text[32];
 	Mobot_getJointAngles((mobot_t*)mobot, &angles[0], &angles[1], &angles[2], &angles[3]);
 	struct motion_s* motion;
 	motion = (struct motion_s*)malloc(sizeof(struct motion_s));
 	motion->motionType = MOTION_POS;
-	motion->data.pos[0] = angles[0];
-	motion->data.pos[1] = angles[1];
-	motion->data.pos[2] = angles[2];
-	motion->data.pos[3] = angles[3];
+  for(i = 0; i < 4; i++) {
+    /* Save angles */
+    motion->data.pos[i] = angles[i];
+  }
+
   poseName = (char*)malloc(32);
   sprintf(poseName, "Pose %d", mobot->numMotions + 1);
 	motion->name = poseName;
@@ -266,6 +269,107 @@ int RecordMobot_getPythonMotionStringB(recordMobot_t* mobot, int index, char* bu
               mobot->name,
               RAD2DEG(mobot->motions[index]->data.pos[0]),
               RAD2DEG(mobot->motions[index]->data.pos[2]));
+          break;
+        case MOBOTFORM_L:
+          sprintf(buf, "%s.moveTo(%.2lf, %.2lf, 0)",
+              mobot->name,
+              RAD2DEG(mobot->motions[index]->data.pos[0]),
+              RAD2DEG(mobot->motions[index]->data.pos[1]));
+          break;
+        case MOBOTFORM_ORIGINAL:
+        default:
+          sprintf(buf, "%s.moveTo(%.2lf, %.2lf, %.2lf, %.2lf)",
+              mobot->name,
+              RAD2DEG(mobot->motions[index]->data.pos[0]),
+              RAD2DEG(mobot->motions[index]->data.pos[1]),
+              RAD2DEG(mobot->motions[index]->data.pos[2]),
+              RAD2DEG(mobot->motions[index]->data.pos[3]) );
+          break;
+      }
+      break;
+    case MOTION_SLEEP:
+      sprintf(buf, "time.sleep(%.2lf)", (mobot->motions[index]->data.sleepDuration));
+      break;
+  }
+	return 0;
+}
+
+GtkWidget* create_angle_entry(double angle)
+{
+  char text[64];
+  GtkWidget* entry = gtk_entry_new();
+  sprintf(text, "%.2lf", angle);
+  gtk_entry_set_text(GTK_ENTRY(entry), text);
+  gtk_entry_set_width_chars(GTK_ENTRY(entry), 7);
+  return entry;
+}
+
+int RecordMobot_getPythonInteractiveMotionStringB(GtkWidget* vbox, recordMobot_t* mobot, int index)
+{
+  /* Create a new HBox to pack into the vbox */
+  char buf[128];
+  /* Create GTK Widgets */
+  int i;
+  for(i = 0; i < 4; i++) {
+    mobot->motions[index]->angleEntries[i] = NULL;
+  }
+  GtkWidget *hbox = gtk_hbox_new(false, 0);
+  switch(mobot->motions[index]->motionType) {
+    case MOTION_POS:
+      switch(mobot->mobot.formFactor) {
+        case MOBOTFORM_I:
+          sprintf(buf, "%s.moveTo(", mobot->name);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[0] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[0]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(" 0, "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[2] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[2]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[2], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(")"), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+          gtk_widget_show_all(hbox);
+          break;
+        case MOBOTFORM_L:
+          sprintf(buf, "%s.moveTo(%.2lf, %.2lf, 0)",
+              mobot->name,
+              RAD2DEG(mobot->motions[index]->data.pos[0]),
+              RAD2DEG(mobot->motions[index]->data.pos[1]));
+          break;
+        case MOBOTFORM_ORIGINAL:
+        default:
+          sprintf(buf, "%s.moveTo(%.2lf, %.2lf, %.2lf, %.2lf)",
+              mobot->name,
+              RAD2DEG(mobot->motions[index]->data.pos[0]),
+              RAD2DEG(mobot->motions[index]->data.pos[1]),
+              RAD2DEG(mobot->motions[index]->data.pos[2]),
+              RAD2DEG(mobot->motions[index]->data.pos[3]) );
+          break;
+      }
+      break;
+    case MOTION_SLEEP:
+      sprintf(buf, "time.sleep(%.2lf)", (mobot->motions[index]->data.sleepDuration));
+      break;
+  }
+	return 0;
+}
+
+int RecordMobot_getPythonInteractiveMotionString(GtkWidget* vbox, recordMobot_t* mobot, int index)
+{
+  /* Create a new HBox to pack into the vbox */
+  char buf[128];
+  GtkWidget *hbox = gtk_hbox_new(false, 0);
+  switch(mobot->motions[index]->motionType) {
+    case MOTION_POS:
+      switch(mobot->mobot.formFactor) {
+        case MOBOTFORM_I:
+          sprintf(buf, "%s.moveToNB(", mobot->name);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(" 0, "), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[3], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(")"), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+          gtk_widget_show(hbox);
           break;
         case MOBOTFORM_L:
           sprintf(buf, "%s.moveTo(%.2lf, %.2lf, 0)",

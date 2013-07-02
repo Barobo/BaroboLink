@@ -676,34 +676,19 @@ gboolean check_io_timeout(gpointer data)
 
 void refreshExternalEditor()
 {
-  /* Clear all contents and rewrite with current pose data */
-  scintilla_send_message(g_sci_ext, SCI_CLEARALL, 0, 0);
-  string* program;
-
-  bool playLooped = false;
-  GtkWidget *w;
-  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "checkbutton_playLooped"));
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))) {
-    playLooped = true;
-  }  
-
-  GtkWidget* combobox;
-  combobox = GTK_WIDGET(gtk_builder_get_object(g_builder, "combobox_outputLanguage"));
-  int languageindex = gtk_combo_box_get_active(GTK_COMBO_BOX(combobox));
-  switch(languageindex) {
-    case 0: // Ch
-      program = g_robotManager->generateChProgram(playLooped, g_holdOnExit);
-      break;
-    case 1:
-      // c++
-      program = g_robotManager->generateCppProgram(playLooped, g_holdOnExit);
-      break;
-    case 2: // Python
-      program = g_robotManager->generatePythonProgram(playLooped, g_holdOnExit);
-      break;
+  static GtkWidget *root_vbox = NULL;
+  if(root_vbox != NULL) {
+    gtk_widget_destroy(root_vbox);
   }
-  scintilla_send_message(g_sci_ext, SCI_INSERTTEXT, 0, (sptr_t)program->c_str());
-  scintilla_send_message(g_sci_ext, SCI_LINESCROLL, 0, 999);
+  root_vbox = gtk_vbox_new(FALSE, 0);
+  g_robotManager->generateInteractivePythonProgram(GTK_VBOX(root_vbox), false, false);
+  GtkWidget *layout = GTK_WIDGET(gtk_builder_get_object(g_builder, "layout1"));
+  GtkRequisition sizeRequest;
+  gtk_widget_size_request(root_vbox, &sizeRequest);
+  gtk_layout_set_size(GTK_LAYOUT(layout), sizeRequest.width, sizeRequest.height);
+  gtk_layout_put(GTK_LAYOUT(layout), root_vbox, 0, 0);
+  gtk_widget_show(root_vbox);
+  gtk_widget_show(layout);
 }
 
 void on_button_copyExternalToClipboard_clicked(GtkWidget *w, gpointer data)

@@ -47,7 +47,7 @@ ScintillaObject *g_sci_ext;
 
 CRobotManager *g_robotManager;
 
-const char *g_interfaceFiles[512] = {
+char *g_interfaceFiles[512] = {
   "interface/interface.glade",
   "interface.glade",
   "../share/BaroboLink/interface.glade",

@@ -58,6 +58,7 @@ class CRobotManager : public ConfigFile
     string* generateChProgram(bool looped = false, bool holdOnExit = false);
     string* generateCppProgram(bool looped = false, bool holdOnExit = false);
     string* generatePythonProgram(bool looped = false, bool holdOnExit = false);
+    void generateInteractivePythonProgram(GtkVBox *vbox, bool looped = false, bool holdOnExit = false);
     bool _isPlaying;
     int _newDndIndex;
   private:

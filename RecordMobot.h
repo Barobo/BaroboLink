@@ -19,6 +19,7 @@
 
 #pragma once
 #include <mobot.h>
+#include <gtk/gtk.h>
 
 enum motionType_e
 {
@@ -34,6 +35,7 @@ struct motion_s
 		double pos[4];
 	} data;
 	char* name;
+  GtkWidget* angleEntries[4];
 };
 #if 0
 class CRecordMobot :
@@ -106,6 +108,8 @@ int RecordMobot_getChMotionString(recordMobot_t* mobot, int index, char* buf);
 int RecordMobot_getChMotionStringB(recordMobot_t* mobot, int index, char* buf);
 int RecordMobot_getPythonMotionString(recordMobot_t* mobot, int index, char* buf);
 int RecordMobot_getPythonMotionStringB(recordMobot_t* mobot, int index, char* buf);
+int RecordMobot_getPythonInteractiveMotionString(GtkWidget* vbox, recordMobot_t* mobot, int index);
+int RecordMobot_getPythonInteractiveMotionStringB(GtkWidget* vbox, recordMobot_t* mobot, int index);
 const char* RecordMobot_getMotionName(recordMobot_t* mobot, int index);
 int RecordMobot_setMotionName(recordMobot_t* mobot, int index, const char* name);
 int RecordMobot_removeMotion(recordMobot_t* mobot, int index, bool releaseData);
