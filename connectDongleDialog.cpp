@@ -55,7 +55,7 @@ void* findDongleThread(void* arg)
     g_dongle = mobot;
     COND_SIGNAL(&foundDongle_cond);
     MUTEX_UNLOCK(&foundDongle_lock);
-  } else if (!Mobot_connectWithTTY_500kbaud((mobot_t*)mobot, buf)) {
+  } else if (!Mobot_connectWithTTYBaud((mobot_t*)mobot, buf, 500000)) {
     MUTEX_LOCK(&foundDongle_lock);
     foundDongle = 1;
     foundDonglePort = portnum;
