@@ -130,6 +130,9 @@ int findDongle(void)
     numThreadsRunning++;
     THREAD_CREATE(&threads[i], findDongleThread, &args[i]);
     MUTEX_UNLOCK(&numThreadsRunning_lock);
+#ifdef _WIN32
+    Sleep(500);
+#endif
 
     /* Check to see if a dongle was found */
     MUTEX_LOCK(&foundDongle_lock);

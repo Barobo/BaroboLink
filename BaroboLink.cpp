@@ -19,6 +19,7 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#include <assert.h>
 #define PLAT_GTK 1
 #define GTK
 #include <Scintilla.h>
@@ -35,7 +36,9 @@
 #include "thread_macros.h"
 #ifdef _MSYS
 #include <windows.h>
-
+#include <Dbt.h>
+#include <tchar.h>
+#include <gdk/gdkwin32.h>
 #endif
 
 GtkBuilder *g_builder;
@@ -57,6 +60,124 @@ const char *g_interfaceFiles[512] = {
 };
 
 char *g_interfaceDir;
+
+#ifdef _WIN32
+HWND g_hWnd;
+WNDPROC g_oldWindowProc;
+
+/* Kind of like perror(), but takes an error code as a parameter as well, from
+ * GetLastError(). Also, the msg string must passed wrapped in the _T() macro.
+ */
+static void werror (LPCTSTR msg, DWORD errcode) {
+    LPVOID errorText;
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
+            | FORMAT_MESSAGE_ALLOCATE_BUFFER
+            | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL, errcode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&errorText,
+            0, NULL);
+    assert(errorText);
+    _ftprintf(stderr, _T("%s: %s\n"), msg, errorText);
+    LocalFree(errorText);
+}
+
+/* Found this on stackoverflow. Baby Jesus... */
+BOOL CALLBACK enumWindowProc (HWND hWnd, LPARAM lParam) {
+  HINSTANCE hInst = (HINSTANCE)GetModuleHandle(NULL);
+
+  if ((HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE) == hInst
+      && IsWindowVisible(hWnd)) {
+    g_hWnd = hWnd;
+    return FALSE;
+  }
+  return TRUE;
+}
+
+static int processDeviceArrival (PDEV_BROADCAST_HDR devhdr) {
+  if (DBT_DEVTYP_PORT != devhdr->dbch_devicetype) {
+    return 0;
+  }
+
+  PDEV_BROADCAST_PORT port = (PDEV_BROADCAST_PORT)devhdr;
+
+  _ftprintf(stdout, _T("%s attached!\n"), port->dbcp_name);
+  return 1;
+}
+
+static int processDeviceRemoveComplete (PDEV_BROADCAST_HDR devhdr) {
+  if (DBT_DEVTYP_PORT != devhdr->dbch_devicetype) {
+    return 0;
+  }
+
+  PDEV_BROADCAST_PORT port = (PDEV_BROADCAST_PORT)devhdr;
+
+  _ftprintf(stdout, _T("%s removed!\n"), port->dbcp_name);
+  return 1;
+}
+
+static LRESULT CALLBACK windowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  int processed = 0;
+
+  /* The two WM_DEVICECHANGE events DBT_DEVICEARRIVAL and DBT_DEVICEREMOVECOMPLETE
+   * are automatically sent to all top-level windows, so there is no need to
+   * register for notification--we just get these for free. */
+  if (WM_DEVICECHANGE == uMsg) {
+    switch (wParam) {
+      case DBT_CONFIGCHANGECANCELED:
+        printf("DBT_CONFIGCHANGECANCELED\n");
+        break;
+      case DBT_CONFIGCHANGED:
+        printf("DBT_CONFIGCHANGED\n");
+        break;
+#if 0
+      case DBT_CUSTOMEVENT:
+        /* Documented, but doesn't exist? */
+        printf("DBT_CUSTOMEVENT\n");
+        break;
+#endif
+      case DBT_DEVICEARRIVAL:
+        printf("DBT_DEVICEARRIVAL\n");
+        processed = processDeviceArrival((PDEV_BROADCAST_HDR)lParam);
+	      break;
+      case DBT_DEVICEQUERYREMOVE:
+        printf("DBT_DEVICEQUERYREMOVE\n");
+        break;
+      case DBT_DEVICEQUERYREMOVEFAILED:
+        printf("DBT_DEVICEQUERYREMOVEFAILED\n");
+        break;
+      case DBT_DEVICEREMOVECOMPLETE:
+        printf("DBT_DEVICEREMOVECOMPLETE\n");
+        processed = processDeviceRemoveComplete((PDEV_BROADCAST_HDR)lParam);
+        break;
+      case DBT_DEVICEREMOVEPENDING:
+        printf("DBT_DEVICEREMOVEPENDING\n");
+        break;
+      case DBT_DEVICETYPESPECIFIC:
+        printf("DBT_DEVICETYPESPECIFIC\n");
+        break;
+      case DBT_DEVNODES_CHANGED:
+        printf("DBT_DEVNODES_CHANGED\n");
+        break;
+      case DBT_QUERYCHANGECONFIG:
+        printf("DBT_QUERYCHANGECONFIG\n");
+        break;
+      case DBT_USERDEFINED:
+        printf("DBT_USERDEFINED\n");
+        break;
+      default:
+        printf("(unknown WM_DEVICECHANGE event)\n");
+        break;
+    }
+  }
+
+  if (!processed) {
+    /* We weren't interested in the message. Pass it along to whomever cares. */
+    return CallWindowProc(g_oldWindowProc, hWnd, uMsg, wParam, lParam);
+  }
+  return TRUE;
+}
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -145,7 +266,41 @@ int main(int argc, char* argv[])
 
   /* Show the window */
   gtk_widget_show(g_window);
+
+#ifdef _WIN32
+#if 0
+  GdkWindow *gdkwin = gtk_widget_get_root_window(g_window);
+  HWND hWnd = (HWND)GDK_WINDOW_HWND(gdkwin);
+  //HWND hWnd = gdk_win32_window_get_impl_hwnd(gdkwin);
+#endif
+  g_hWnd = NULL;
+  EnumWindows(enumWindowProc, 0);
+  assert(g_hWnd);
+  g_oldWindowProc = (WNDPROC)SetWindowLongPtr(g_hWnd, GWLP_WNDPROC, (LONG_PTR)windowProc);
+  if (!g_oldWindowProc) {
+    werror("SetWindowLongPtr", GetLastError());
+    exit(1);
+  }
+
+  struct _DEV_BROADCAST_DEVICEINTERFACE filter = {
+    .dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE),
+    .dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE,
+    .dbcc_classguid = &GUID_DEVINTERFACE_COMPORT
+  };
+  HDEVNOTIFY hNotify = RegisterDeviceNotification(g_hWnd, (LPVOID)&filter, DEVICE_NOTIFY_WINDOW_HANDLE);
+  if (!hNotify) {
+    werror("RegisterDeviceNotification", GetLastError());
+    exit(1);
+  }
+#endif
+
   gtk_main();
+
+  if (!UnregisterDeviceNotification(hNotify)) {
+    werror("UnregisterDeviceNotification", GetLastError());
+    exit(1);
+  }
+
   return 0;
 }
 
