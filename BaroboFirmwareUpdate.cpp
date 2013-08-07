@@ -85,7 +85,7 @@ void* findDongleWorkerThread(void* arg)
   Mobot_init(mobot);
   rc = Mobot_connectWithTTY(mobot, buf);
   if(rc != 0) {
-    rc = Mobot_connectWithTTY_500kbaud(mobot, buf);
+    rc = Mobot_connectWithTTYBaud(mobot, buf, 500000);
   }
   if(rc == 0) {
     /* We found the Mobot */
