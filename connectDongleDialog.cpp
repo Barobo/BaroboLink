@@ -77,7 +77,7 @@ void* findDongleThread(void* arg)
 
 int findDongle(void)
 {
-  char buf[32];
+  char buf[256];
   int foundDonglePort = Mobot_dongleGetTTY(buf, sizeof(buf));
 
   if (-1 == foundDonglePort) {
