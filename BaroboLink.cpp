@@ -17,26 +17,40 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef _MSYS
+/* hlh: This is here to support USB hotplug detection. */
+#define WINVER 0x0501   // Tell Windows headers we're targeting WinXP
+#endif
+
 #include <gtk/gtk.h>
 #include <string.h>
 #include <assert.h>
+
 #define PLAT_GTK 1
 #define GTK
+
 #include <Scintilla.h>
 #include <SciLexer.h>
 #include <ScintillaWidget.h>
 #include "BaroboLink.h"
 #include "RobotManager.h"
+
 #ifdef __MACH__
 #include <sys/types.h>
 #include <unistd.h>
 #include <gtk-mac-integration.h>
 #endif
+
 #include <sys/stat.h>
 #include "thread_macros.h"
+
 #ifdef _MSYS
+#include "libbarobo/win32_error.h"
 #include <windows.h>
-#include <Dbt.h>
+#include <dbt.h>
+#include <initguid.h>   // must be included before ddk/*, otherwise link error
+                        // (because that makes complete sense)
+#include <ddk/usbiodef.h>
 #include <tchar.h>
 #include <gdk/gdkwin32.h>
 #endif
@@ -62,111 +76,74 @@ const char *g_interfaceFiles[512] = {
 char *g_interfaceDir;
 
 #ifdef _WIN32
-HWND g_hWnd;
 WNDPROC g_oldWindowProc;
 
-/* Kind of like perror(), but takes an error code as a parameter as well, from
- * GetLastError(). Also, the msg string must passed wrapped in the _T() macro.
- */
-static void werror (LPCTSTR msg, DWORD errcode) {
-    LPVOID errorText;
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
-            | FORMAT_MESSAGE_ALLOCATE_BUFFER
-            | FORMAT_MESSAGE_IGNORE_INSERTS,
-            NULL, errcode,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPTSTR)&errorText,
-            0, NULL);
-    assert(errorText);
-    _ftprintf(stderr, _T("%s: %s\n"), msg, errorText);
-    LocalFree(errorText);
-}
-
-/* Found this on stackoverflow. Baby Jesus... */
-BOOL CALLBACK enumWindowProc (HWND hWnd, LPARAM lParam) {
-  HINSTANCE hInst = (HINSTANCE)GetModuleHandle(NULL);
-
-  if ((HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE) == hInst
-      && IsWindowVisible(hWnd)) {
-    g_hWnd = hWnd;
-    return FALSE;
-  }
-  return TRUE;
-}
-
 static int processDeviceArrival (PDEV_BROADCAST_HDR devhdr) {
-  if (DBT_DEVTYP_PORT != devhdr->dbch_devicetype) {
+  if (DBT_DEVTYP_DEVICEINTERFACE != devhdr->dbch_devicetype) {
     return 0;
   }
 
-  PDEV_BROADCAST_PORT port = (PDEV_BROADCAST_PORT)devhdr;
+  PDEV_BROADCAST_DEVICEINTERFACE device
+    = (PDEV_BROADCAST_DEVICEINTERFACE)devhdr;
 
-  _ftprintf(stdout, _T("%s attached!\n"), port->dbcp_name);
+  _tprintf(_T("%s arrived\n"), device->dbcc_name);
   return 1;
 }
 
 static int processDeviceRemoveComplete (PDEV_BROADCAST_HDR devhdr) {
-  if (DBT_DEVTYP_PORT != devhdr->dbch_devicetype) {
+  if (DBT_DEVTYP_DEVICEINTERFACE != devhdr->dbch_devicetype) {
     return 0;
   }
 
-  PDEV_BROADCAST_PORT port = (PDEV_BROADCAST_PORT)devhdr;
+  PDEV_BROADCAST_DEVICEINTERFACE device
+    = (PDEV_BROADCAST_DEVICEINTERFACE)devhdr;
 
-  _ftprintf(stdout, _T("%s removed!\n"), port->dbcp_name);
+  _tprintf(_T("%s removed\n"), device->dbcc_name);
   return 1;
 }
 
 static LRESULT CALLBACK windowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   int processed = 0;
 
-  /* The two WM_DEVICECHANGE events DBT_DEVICEARRIVAL and DBT_DEVICEREMOVECOMPLETE
-   * are automatically sent to all top-level windows, so there is no need to
-   * register for notification--we just get these for free. */
   if (WM_DEVICECHANGE == uMsg) {
     switch (wParam) {
       case DBT_CONFIGCHANGECANCELED:
-        printf("DBT_CONFIGCHANGECANCELED\n");
+        //printf("DBT_CONFIGCHANGECANCELED\n");
         break;
       case DBT_CONFIGCHANGED:
-        printf("DBT_CONFIGCHANGED\n");
+        //printf("DBT_CONFIGCHANGED\n");
         break;
-#if 0
-      case DBT_CUSTOMEVENT:
-        /* Documented, but doesn't exist? */
-        printf("DBT_CUSTOMEVENT\n");
-        break;
-#endif
       case DBT_DEVICEARRIVAL:
-        printf("DBT_DEVICEARRIVAL\n");
+        //printf("DBT_DEVICEARRIVAL\n");
         processed = processDeviceArrival((PDEV_BROADCAST_HDR)lParam);
-	      break;
+        break;
       case DBT_DEVICEQUERYREMOVE:
-        printf("DBT_DEVICEQUERYREMOVE\n");
+        //printf("DBT_DEVICEQUERYREMOVE\n");
         break;
       case DBT_DEVICEQUERYREMOVEFAILED:
-        printf("DBT_DEVICEQUERYREMOVEFAILED\n");
+        //printf("DBT_DEVICEQUERYREMOVEFAILED\n");
         break;
       case DBT_DEVICEREMOVECOMPLETE:
-        printf("DBT_DEVICEREMOVECOMPLETE\n");
+        //printf("DBT_DEVICEREMOVECOMPLETE\n");
         processed = processDeviceRemoveComplete((PDEV_BROADCAST_HDR)lParam);
         break;
       case DBT_DEVICEREMOVEPENDING:
-        printf("DBT_DEVICEREMOVEPENDING\n");
+        //printf("DBT_DEVICEREMOVEPENDING\n");
         break;
       case DBT_DEVICETYPESPECIFIC:
-        printf("DBT_DEVICETYPESPECIFIC\n");
+        //printf("DBT_DEVICETYPESPECIFIC\n");
         break;
       case DBT_DEVNODES_CHANGED:
-        printf("DBT_DEVNODES_CHANGED\n");
+        //printf("DBT_DEVNODES_CHANGED\n");
         break;
       case DBT_QUERYCHANGECONFIG:
-        printf("DBT_QUERYCHANGECONFIG\n");
+        //printf("DBT_QUERYCHANGECONFIG\n");
         break;
       case DBT_USERDEFINED:
-        printf("DBT_USERDEFINED\n");
+        //printf("DBT_USERDEFINED\n");
         break;
       default:
-        printf("(unknown WM_DEVICECHANGE event)\n");
+        //printf("(unknown WM_DEVICECHANGE event)\n");
         break;
     }
   }
@@ -177,6 +154,64 @@ static LRESULT CALLBACK windowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
   }
   return TRUE;
 }
+
+static BOOL CALLBACK enumWindowProc (HWND hWnd, LPARAM lParam) {
+  HINSTANCE hInst = (HINSTANCE)GetModuleHandle(NULL);
+
+  if ((HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE) == hInst
+      && IsWindowVisible(hWnd)) {
+    /* lParam is an output parameter window handle */
+    *(HWND *)lParam = hWnd;
+    SetLastError(ERROR_SUCCESS);
+    return FALSE;
+  }
+  return TRUE;
+}
+
+static HDEVNOTIFY registerForDeviceChanges () {
+  /* Getting the top-level window handle should be as simple as:
+   * GdkWindow *gdkwin = gtk_widget_get_root_window(g_window);
+   * HWND hWnd = (HWND)GDK_WINDOW_HWND(gdkwin);
+   * But I couldn't get it working. Found this hacky method on stackoverflow. */
+  HWND hWnd = NULL;
+  if (!EnumWindows(enumWindowProc, (LPARAM)&hWnd)) {
+    DWORD err = GetLastError();
+    if (ERROR_SUCCESS != err) {
+      win32_error(_T("EnumWindows"), err);
+      exit(1);
+    }
+  }
+  assert(hWnd);
+
+  /* Now that we have our top-level window handle, we can replace its WindowProc
+   * with our own to intercept WM_DEVICECHANGE messages. */
+  g_oldWindowProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)windowProc);
+  if (!g_oldWindowProc) {
+    win32_error("SetWindowLongPtr", GetLastError());
+    exit(1);
+  }
+
+  DEV_BROADCAST_DEVICEINTERFACE filter = { 0 };
+  filter.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+  filter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+  //filter.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
+  HDEVNOTIFY hNotify = RegisterDeviceNotification(hWnd, (LPVOID)&filter,
+      DEVICE_NOTIFY_WINDOW_HANDLE | DEVICE_NOTIFY_ALL_INTERFACE_CLASSES);
+  if (!hNotify) {
+    win32_error("RegisterDeviceNotification", GetLastError());
+    exit(1);
+  }
+
+  return hNotify;
+}
+
+static void unregisterForDeviceChanges (HDEVNOTIFY hNotify) {
+  if (!UnregisterDeviceNotification(hNotify)) {
+    win32_error("UnregisterDeviceNotification", GetLastError());
+    exit(1);
+  }
+}
+
 #endif
 
 int main(int argc, char* argv[])
@@ -268,38 +303,14 @@ int main(int argc, char* argv[])
   gtk_widget_show(g_window);
 
 #ifdef _WIN32
-#if 0
-  GdkWindow *gdkwin = gtk_widget_get_root_window(g_window);
-  HWND hWnd = (HWND)GDK_WINDOW_HWND(gdkwin);
-  //HWND hWnd = gdk_win32_window_get_impl_hwnd(gdkwin);
-#endif
-  g_hWnd = NULL;
-  EnumWindows(enumWindowProc, 0);
-  assert(g_hWnd);
-  g_oldWindowProc = (WNDPROC)SetWindowLongPtr(g_hWnd, GWLP_WNDPROC, (LONG_PTR)windowProc);
-  if (!g_oldWindowProc) {
-    werror("SetWindowLongPtr", GetLastError());
-    exit(1);
-  }
-
-  struct _DEV_BROADCAST_DEVICEINTERFACE filter = {
-    .dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE),
-    .dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE,
-    .dbcc_classguid = &GUID_DEVINTERFACE_COMPORT
-  };
-  HDEVNOTIFY hNotify = RegisterDeviceNotification(g_hWnd, (LPVOID)&filter, DEVICE_NOTIFY_WINDOW_HANDLE);
-  if (!hNotify) {
-    werror("RegisterDeviceNotification", GetLastError());
-    exit(1);
-  }
+  HDEVNOTIFY hNotify = registerForDeviceChanges();
 #endif
 
   gtk_main();
 
-  if (!UnregisterDeviceNotification(hNotify)) {
-    werror("UnregisterDeviceNotification", GetLastError());
-    exit(1);
-  }
+#ifdef _WIN32
+  unregisterForDeviceChanges(hNotify);
+#endif
 
   return 0;
 }
@@ -404,9 +415,11 @@ void on_menuitem_demos_activate(GtkWidget *widget, gpointer data)
   PROCESS_INFORMATION pi;
   memset(&si, 0, sizeof(STARTUPINFO));
   memset(&pi, 0, sizeof(PROCESS_INFORMATION));
+  char cmdline[256];
+  strncpy(cmdline, "-d C:\\ch\\package\\chmobot\\demos", sizeof(cmdline));
   CreateProcess(
 	"C:\\ch\\bin\\chide.exe",
-	"-d C:\\ch\\package\\chmobot\\demos",
+  cmdline,
 	NULL,
 	NULL,
 	FALSE,

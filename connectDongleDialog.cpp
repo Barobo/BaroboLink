@@ -34,6 +34,7 @@ MUTEX_T foundDongle_lock;
 COND_T foundDongle_cond;
 recordMobot_t* g_dongle;
 
+#if 0
 void* findDongleThread(void* arg)
 {
   int portnum = *(int*)arg;
@@ -72,9 +73,49 @@ void* findDongleThread(void* arg)
   MUTEX_UNLOCK(&numThreadsRunning_lock);
   return NULL;
 }
+#endif
 
 int findDongle(void)
 {
+  char buf[32];
+  int foundDonglePort = Mobot_dongleGetTTY(buf, sizeof(buf));
+
+  if (-1 == foundDonglePort) {
+    return -1;
+  }
+  
+#ifndef _WIN32
+  sprintf(buf, "/dev/ttyACM%d", foundDonglePort);
+#else
+  sprintf(buf, "\\\\.\\COM%d", foundDonglePort);
+#endif
+
+  /* Try to connect to the port */
+  recordMobot_t* mobot = (recordMobot_t*)malloc(sizeof(recordMobot_t));
+  RecordMobot_init(mobot, "Dongle");
+  if(!Mobot_connectWithTTY((mobot_t*)mobot, buf)) {
+    g_dongle = mobot;
+  } else if (!Mobot_connectWithTTYBaud((mobot_t*)mobot, buf, 500000)) {
+    g_dongle = mobot;
+  } else {
+    Mobot_disconnect((mobot_t*)mobot);
+    free(mobot);
+    return -1;
+  }
+  g_mobotParent = g_dongle;
+  /* We found the TTY port. */
+  g_robotManager->addDongle(buf);
+  g_robotManager->write();
+  Mobot_setDongleMobot((mobot_t*)g_mobotParent);
+  /* Modify widgets in dongle dialog */
+  GtkLabel *currentComPort = GTK_LABEL(gtk_builder_get_object(g_builder, "label_connectDongleCurrentPort"));
+  gtk_label_set_text(currentComPort, buf);
+  GtkWidget *w;
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "image_dongleConnected"));
+  gtk_image_set_from_stock(GTK_IMAGE(w), GTK_STOCK_YES, GTK_ICON_SIZE_BUTTON);
+  return 0;
+
+#if 0
   THREAD_T threads[MAX_COMPORT];
   int args[MAX_COMPORT];
   int i = 0;
@@ -190,6 +231,7 @@ int findDongle(void)
   MUTEX_UNLOCK(&foundDongle_lock);
 
   return -1;
+#endif
 }
 
 void askConnectDongle(void)
