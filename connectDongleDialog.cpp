@@ -96,12 +96,12 @@ int findDongle(void)
   }
   g_mobotParent = g_dongle;
   /* We found the TTY port. */
-  g_robotManager->addDongle(buf);
+  g_robotManager->addDongle(serialDevice);
   g_robotManager->write();
   Mobot_setDongleMobot((mobot_t*)g_mobotParent);
   /* Modify widgets in dongle dialog */
   GtkLabel *currentComPort = GTK_LABEL(gtk_builder_get_object(g_builder, "label_connectDongleCurrentPort"));
-  gtk_label_set_text(currentComPort, buf);
+  gtk_label_set_text(currentComPort, serialDevice);
   GtkWidget *w;
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "image_dongleConnected"));
   gtk_image_set_from_stock(GTK_IMAGE(w), GTK_STOCK_YES, GTK_ICON_SIZE_BUTTON);
