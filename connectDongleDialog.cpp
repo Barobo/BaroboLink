@@ -77,25 +77,17 @@ void* findDongleThread(void* arg)
 
 int findDongle(void)
 {
-  char buf[256];
-  int foundDonglePort = Mobot_dongleGetTTY(buf, sizeof(buf));
-
-  if (-1 == foundDonglePort) {
+  char serialDevice[256];
+  if (-1 == Mobot_dongleGetTTY(serialDevice, sizeof(serialDevice))) {
     return -1;
   }
   
-#ifndef _WIN32
-  sprintf(buf, "/dev/ttyACM%d", foundDonglePort);
-#else
-  sprintf(buf, "\\\\.\\COM%d", foundDonglePort);
-#endif
-
   /* Try to connect to the port */
   recordMobot_t* mobot = (recordMobot_t*)malloc(sizeof(recordMobot_t));
   RecordMobot_init(mobot, "Dongle");
-  if(!Mobot_connectWithTTY((mobot_t*)mobot, buf)) {
+  if(!Mobot_connectWithTTY((mobot_t*)mobot, serialDevice)) {
     g_dongle = mobot;
-  } else if (!Mobot_connectWithTTYBaud((mobot_t*)mobot, buf, 500000)) {
+  } else if (!Mobot_connectWithTTYBaud((mobot_t*)mobot, serialDevice, 500000)) {
     g_dongle = mobot;
   } else {
     Mobot_disconnect((mobot_t*)mobot);
@@ -116,6 +108,8 @@ int findDongle(void)
   return 0;
 
 #if 0
+  /* hlh: deprecated by Mobot_dongleGetTTY(), but we might have to use this
+   * again for the OSX version... */
   THREAD_T threads[MAX_COMPORT];
   int args[MAX_COMPORT];
   int i = 0;
