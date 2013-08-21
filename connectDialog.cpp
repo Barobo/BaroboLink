@@ -105,7 +105,28 @@ void* connectThread(void* arg)
   struct connectThreadArg_s* a;
   a = (struct connectThreadArg_s*)arg;
   a->connectReturnVal = g_robotManager->connectIndex(a->connectIndex);
+  mobot_t* mobot;
+  mobot = (mobot_t*)g_robotManager->getMobotIndex(a->connectIndex);
+  uint16_t addr;
+  Mobot_getMasterAddress(mobot, &addr);
+  mobot_t* master;
+  if(addr != 0) {
+    /* Check to see if the master is already connected */
+    if(!g_robotManager->isConnectedZigbee(addr)) {
+      /* We have to connect to it to find its serial ID */
+      master = (mobot_t*)malloc(sizeof(mobot_t));
+      Mobot_init(master);
+      Mobot_connectWithZigbeeAddress(master, addr);
+    } else {
+      master = g_robotManager->getMobotZMAddr(addr);
+    }
+    if( (master == NULL) || (master->connected == 0) ) {
+      a->connectionCompleted = 1;
+      return NULL;
+    }
+  }
   a->connectionCompleted = 1;
+  return NULL;
 }
 
 gboolean progressBarConnectUpdate(gpointer data)

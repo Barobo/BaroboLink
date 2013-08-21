@@ -41,6 +41,7 @@ class CRobotManager : public ConfigFile
     int moveEntryDown(int index);
     int insertEntry(const char* entry, int index);
     bool isConnected(int index);
+    bool isConnectedZigbee(uint16_t addr);
     bool isPlaying();
     int connectIndex(int index);
     int disconnect(int index);
@@ -55,6 +56,7 @@ class CRobotManager : public ConfigFile
     void play();
     recordMobot_t* getMobot(int connectIndex);
     recordMobot_t* getMobotIndex(int index);
+    recordMobot_t* getMobotZBAddr(uint16_t addr);
     string* generateChProgram(bool looped = false, bool holdOnExit = false);
     string* generateCppProgram(bool looped = false, bool holdOnExit = false);
     string* generatePythonProgram(bool looped = false, bool holdOnExit = false);

@@ -47,6 +47,23 @@ bool CRobotManager::isConnected(int index)
   return Mobot_isConnected((mobot_t*)_mobots[index]);
 }
 
+bool CRobotManager::isConnectedZigbee(uint16_t addr)
+{
+  int i;
+  for(i = 0; i < MAX_CONNECTED; i++) {
+    if(_mobots[i]) {
+      if(
+          (_mobots[i]->mobot.zigbeeAddr == addr) &&
+          (_mobots[i]->mobot.connected)
+        )
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 int CRobotManager::addEntry(const char* entry)
 {
   int rc;
@@ -294,6 +311,18 @@ recordMobot_t* CRobotManager::getMobot(int connectIndex)
 recordMobot_t* CRobotManager::getMobotIndex(int index)
 {
   return _mobots[index];
+}
+
+recordMobot_t* CRobotManager::getMobotZBAddr(uint16_t addr)
+{
+  /* See if any of our robots has the zigbee address and return it. */
+  int i;
+  for(i = 0; i < MAX_CONNECTED; i++) {
+    if(_mobots[i]->mobot->zigbeeAddr == addr) {
+      return _mobots[i];
+    }
+  }
+  return NULL;
 }
 
 string* CRobotManager::generateChProgram(bool looped, bool holdOnExit)

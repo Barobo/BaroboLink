@@ -72,6 +72,11 @@ const char* ConfigFile::getEntry(int index)
   return BCF_GetIndex(_bcf, index);
 }
 
+int ConfigFile::getEntryIndex(const char* entry)
+{
+  return BCF_GetEntryIndex(_bcf, entry);
+}
+
 bool ConfigFile::entryExists(const char* entry)
 {
   bool rc;
