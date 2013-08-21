@@ -78,6 +78,15 @@ int CRobotManager::addEntry(const char* entry)
   _mobots[0] = NULL;
 }
 
+int CRobotManager::addMobot(recordMobot_t* mobot)
+{
+  /* See if the mobot serial id already exists */
+  if(!entryExists(mobot->mobot.serialID)) {
+    addEntry(mobot->mobot.serialID);
+  }
+  return setMobotBySerialID(mobot->mobot.serialID, mobot);
+}
+
 int CRobotManager::disconnectAll()
 {
   int i;
@@ -308,6 +317,31 @@ recordMobot_t* CRobotManager::getMobot(int connectIndex)
 	return _mobots[i];
 }
 
+int CRobotManager::setMobotByIndex(int index, recordMobot_t* mobot)
+{
+  _mobots[index] = mobot;
+}
+
+int CRobotManager::setMobotBySerialID(const char* id, recordMobot_t* mobot)
+{
+  /* Figure out the index, if it is in here */
+  int i;
+  const char* entry;
+  for(i = 0; i < MAX_CONNECTED; i++) {
+    entry = getEntry(i);
+    if(entry == NULL) { continue; }
+    if(!strcmp(entry, id)) {
+      _mobots[i] = mobot;
+      if(_mobots[i]->mobot.connected) {
+        char name[80];
+        sprintf(_mobots[i]->name, "mobot%d", numConnected()+1);
+      }
+      return 0;
+    }
+  }
+  return -1;
+}
+
 recordMobot_t* CRobotManager::getMobotIndex(int index)
 {
   return _mobots[index];
@@ -318,11 +352,46 @@ recordMobot_t* CRobotManager::getMobotZBAddr(uint16_t addr)
   /* See if any of our robots has the zigbee address and return it. */
   int i;
   for(i = 0; i < MAX_CONNECTED; i++) {
-    if(_mobots[i]->mobot->zigbeeAddr == addr) {
+    if(_mobots[i] == NULL) {
+      continue;
+    }
+    if(_mobots[i]->mobot.zigbeeAddr == addr) {
       return _mobots[i];
     }
   }
   return NULL;
+}
+
+void CRobotManager::connectZBAddr(uint16_t addr)
+{
+  int i;
+  for(i = 0; i < MAX_CONNECTED; i++) {
+    if(_mobots[i] == NULL) {
+      continue;
+    }
+    if(_mobots[i]->mobot.zigbeeAddr == addr) {
+      if(_mobots[i]->mobot.connected) {
+        return;
+      }
+      connectIndex(i);
+      return;
+    }
+  }
+}
+
+int CRobotManager::connectSerialID(const char* id)
+{
+  /* Figure out the index, if it is in here */
+  int i;
+  const char* entry;
+  for(i = 0; i < MAX_CONNECTED; i++) {
+    entry = getEntry(i);
+    if(entry == NULL) { continue; }
+    if(!strcmp(entry, id)) {
+      return connectIndex(i);
+    }
+  }
+  return -1;
 }
 
 string* CRobotManager::generateChProgram(bool looped, bool holdOnExit)

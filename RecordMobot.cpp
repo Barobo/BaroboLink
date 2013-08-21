@@ -69,6 +69,21 @@ int RecordMobot_connectWithAddress(recordMobot_t* mobot, const char address[], i
   return 0;
 }
 
+int RecordMobot_connectWithZigbeeAddress(recordMobot_t* mobot, uint16_t addr)
+{
+  int rc;
+  mobot->connectStatus = RMOBOT_CONNECTING;
+  if(rc = Mobot_connectWithZigbeeAddress((mobot_t*)mobot, addr)) {
+    mobot->connectStatus = RMOBOT_NOT_CONNECTED;
+    return rc;
+  }
+  mobot->firmwareVersion = Mobot_getVersion((mobot_t*)mobot);
+    mobot->connectStatus = RMOBOT_CONNECTED;
+  mobot->dirty = 1;
+  strcpy(mobot->address, mobot->mobot.serialID);
+  return 0;
+}
+
 const char* RecordMobot_getAddress(recordMobot_t* mobot)
 {
   return mobot->address;
