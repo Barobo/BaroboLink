@@ -135,6 +135,7 @@ void* connectThread(void* arg)
       /* Connect to all of the master's children */
       connectToChildren((mobot_t*)master);
     }
+    /* TODO Here, we want to get all of the poses from each child. */
   }
   a->connectionCompleted = 1;
   return NULL;
