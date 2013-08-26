@@ -330,7 +330,7 @@ int CRobotManager::setMobotBySerialID(const char* id, recordMobot_t* mobot)
   for(i = 0; i < MAX_CONNECTED; i++) {
     entry = getEntry(i);
     if(entry == NULL) { continue; }
-    if(!strcmp(entry, id)) {
+    if(!strcasecmp(entry, id)) {
       _mobots[i] = mobot;
       if(_mobots[i]->mobot.connected) {
         char name[80];
@@ -387,7 +387,7 @@ int CRobotManager::connectSerialID(const char* id)
   for(i = 0; i < MAX_CONNECTED; i++) {
     entry = getEntry(i);
     if(entry == NULL) { continue; }
-    if(!strcmp(entry, id)) {
+    if(!strcasecmp(entry, id)) {
       return connectIndex(i);
     }
   }
