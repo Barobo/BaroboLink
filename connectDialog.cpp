@@ -105,6 +105,40 @@ void* connectThread(void* arg)
   struct connectThreadArg_s* a;
   a = (struct connectThreadArg_s*)arg;
   a->connectReturnVal = g_robotManager->connectIndex(a->connectIndex);
+  mobot_t* mobot;
+  mobot = (mobot_t*)g_robotManager->getMobotIndex(a->connectIndex);
+  uint16_t addr;
+  Mobot_getMasterAddress(mobot, &addr);
+  recordMobot_t* master;
+  if(addr == mobot->zigbeeAddr) {
+    /* We just connected to the master */
+    connectToChildren(mobot);
+  }
+  else if(addr != 0) {
+    /* Check to see if the master is already connected */
+    if(!g_robotManager->isConnectedZigbee(addr)) {
+      /* We have to connect to it to find its serial ID */
+      master = RecordMobot_new();
+      RecordMobot_init(master, "Linkbot");
+      rc = RecordMobot_connectWithZigbeeAddress(master, addr);
+      if(rc) {
+        a->connectionCompleted=1;
+        return NULL;
+      }
+      /* Add the master to the list of robots if it's not in there already */
+      g_robotManager->addMobot((recordMobot_t*)master);
+    } else {
+      master = g_robotManager->getMobotZBAddr(addr);
+    }
+    if( (master == NULL) || (master->mobot.connected == 0) ) {
+      a->connectionCompleted = 1;
+      return NULL;
+    } else {
+      /* Connect to all of the master's children */
+      connectToChildren((mobot_t*)master);
+    }
+    /* TODO Here, we want to get all of the poses from each child. */
+  }
   a->connectionCompleted = 1;
 }
 
@@ -177,6 +211,7 @@ gboolean progressBarConnectUpdate(gpointer data)
         GTK_WIDGET(gtk_builder_get_object(g_builder, "dialog_connectFailed")));
     }
     refreshConnectDialog();
+    teachingDialog_refreshRecordedMotions(-1);
     free(a);
     free(buf);
     return FALSE;

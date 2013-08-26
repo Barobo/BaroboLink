@@ -226,6 +226,7 @@ void* playThread(void* arg);
 gboolean poseGuiTimeout(gpointer userdata);
 extern bool g_holdOnExit;
 G_MODULE_EXPORT void on_combobox_outputLanguage_changed(GtkComboBox *w, gpointer data);
+void teachingDialog_refreshRecordedMotions(int currentMotion);
 
 /* Comms Engine */
 int initializeComms(void);
