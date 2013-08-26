@@ -112,11 +112,15 @@ void* connectThread(void* arg)
   uint16_t addr;
   Mobot_getMasterAddress(mobot, &addr);
   recordMobot_t* master;
-  if(addr != 0) {
+  if(addr == mobot->zigbeeAddr) {
+    /* We just connected to the master */
+    connectToChildren(mobot);
+  }
+  else if(addr != 0) {
     /* Check to see if the master is already connected */
     if(!g_robotManager->isConnectedZigbee(addr)) {
       /* We have to connect to it to find its serial ID */
-      master = (recordMobot_t*)malloc(sizeof(recordMobot_t));
+      master = RecordMobot_new();
       RecordMobot_init(master, "Linkbot");
       rc = RecordMobot_connectWithZigbeeAddress(master, addr);
       if(rc) {
@@ -241,6 +245,7 @@ gboolean progressBarConnectUpdate(gpointer data)
         GTK_WIDGET(gtk_builder_get_object(g_builder, "dialog_connectFailed")));
     }
     refreshConnectDialog();
+    teachingDialog_refreshRecordedMotions(-1);
     free(a);
     free(buf);
     return FALSE;

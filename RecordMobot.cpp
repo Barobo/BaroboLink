@@ -57,6 +57,11 @@ void RecordMobot_destroy(recordMobot_t* mobot)
 int RecordMobot_connectWithAddress(recordMobot_t* mobot, const char address[], int channel)
 {
   int rc;
+  int numPoses;
+  double a1, a2, a3, a4;
+  int i;
+  struct motion_s* motion;
+  char *posename;
   strcpy(mobot->address, address);
   mobot->connectStatus = RMOBOT_CONNECTING;
   if(rc = Mobot_connectWithAddress((mobot_t*)mobot, address, channel)) {
@@ -65,6 +70,24 @@ int RecordMobot_connectWithAddress(recordMobot_t* mobot, const char address[], i
   }
   mobot->firmwareVersion = Mobot_getVersion((mobot_t*)mobot);
     mobot->connectStatus = RMOBOT_CONNECTED;
+  if(strlen(address)==4) {
+    /* If it was a linkbot, get all of its poses */
+    rc = Mobot_getNumPoses((mobot_t*)mobot, &numPoses);
+    for(i = 0; i < numPoses; i++) {
+      rc = Mobot_getPoseData((mobot_t*)mobot, i, &a1, &a2, &a3, &a4);
+      motion = (struct motion_s*)malloc(sizeof(struct motion_s));
+      motion->motionType = MOTION_POS;
+      motion->data.pos[0] = a1;
+      motion->data.pos[1] = a2;
+      motion->data.pos[2] = a3;
+      motion->data.pos[3] = 0;
+      posename = (char*)malloc(32);
+      sprintf(posename, "Pose %d", mobot->numMotions + 1);
+      motion->name = posename;
+      mobot->motions[mobot->numMotions] = motion;
+      mobot->numMotions++;
+    }
+  }
   mobot->dirty = 1;
   return 0;
 }
@@ -72,6 +95,11 @@ int RecordMobot_connectWithAddress(recordMobot_t* mobot, const char address[], i
 int RecordMobot_connectWithZigbeeAddress(recordMobot_t* mobot, uint16_t addr)
 {
   int rc;
+  double a1, a2, a3, a4;
+  int numPoses;
+  int i;
+  struct motion_s* motion;
+  char *posename;
   mobot->connectStatus = RMOBOT_CONNECTING;
   if(rc = Mobot_connectWithZigbeeAddress((mobot_t*)mobot, addr)) {
     mobot->connectStatus = RMOBOT_NOT_CONNECTED;
@@ -81,6 +109,22 @@ int RecordMobot_connectWithZigbeeAddress(recordMobot_t* mobot, uint16_t addr)
     mobot->connectStatus = RMOBOT_CONNECTED;
   mobot->dirty = 1;
   strcpy(mobot->address, mobot->mobot.serialID);
+  /* If it was a linkbot, get all of its poses */
+  rc = Mobot_getNumPoses((mobot_t*)mobot, &numPoses);
+  for(i = 0; i < numPoses; i++) {
+    rc = Mobot_getPoseData((mobot_t*)mobot, i, &a1, &a2, &a3, &a4);
+    motion = (struct motion_s*)malloc(sizeof(struct motion_s));
+    motion->motionType = MOTION_POS;
+    motion->data.pos[0] = a1;
+    motion->data.pos[1] = a2;
+    motion->data.pos[2] = a3;
+    motion->data.pos[3] = 0;
+    posename = (char*)malloc(32);
+    sprintf(posename, "Pose %d", mobot->numMotions + 1);
+    motion->name = posename;
+    mobot->motions[mobot->numMotions] = motion;
+    mobot->numMotions++;
+  }
   return 0;
 }
 
