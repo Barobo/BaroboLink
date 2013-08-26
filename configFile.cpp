@@ -76,7 +76,7 @@ bool ConfigFile::entryExists(const char* entry)
 {
   bool rc;
   for(int i = 0; i < BCF_GetNum(_bcf); i++) {
-    if(!strcmp(entry, BCF_GetIndex(_bcf, i))) {
+    if(!strcasecmp(entry, BCF_GetIndex(_bcf, i))) {
       return true;
     }
   }
