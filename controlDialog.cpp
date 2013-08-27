@@ -224,7 +224,9 @@ void initControlDialog(void)
   setMotorWidgetsSensitive(3, true);
   setMotorWidgetsSensitive(4, false);
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "image_jointDiagram"));
-  gtk_image_set_from_file(GTK_IMAGE(w), "interface/DOF_joint_diagram.png");
+  char buf[256];
+  sprintf(buf, "%s/DOF_joint_diagram.png", g_interfaceDir);
+  gtk_image_set_from_file(GTK_IMAGE(w), buf);
   setColorWidgetSensitive(true);
   setAccelWidgetSensitive(true);
   setRollingControlSensitive(true);
@@ -294,14 +296,15 @@ gboolean controllerHandlerTimeout(gpointer data)
   int rc;
   static int form;
   static int formFactorInitialized;
-  char buf[80];
+  char buf[256];
 
   static GtkWidget 
     *vscale_motorPos[4],
     *label_motorPos[4],
     *vscale_motorspeed[4],
     *vscale_accel[4],
-    *label_motorSpeed[4];
+    *label_motorSpeed[4],
+    *label_accel[4];
   static int init = 1;
 
   if(init) {
@@ -312,6 +315,8 @@ gboolean controllerHandlerTimeout(gpointer data)
       label_motorPos[i] = GTK_WIDGET(gtk_builder_get_object(g_builder, buf)); 
       sprintf(buf, "vscale_motorspeed%d", i+1);
       vscale_motorspeed[i] = GTK_WIDGET(gtk_builder_get_object(g_builder, buf)); 
+      sprintf(buf, "label_accel%d", i+1);
+      label_accel[i] = GTK_WIDGET(gtk_builder_get_object(g_builder, buf)); 
     }
     vscale_accel[0] = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_accelx"));
     vscale_accel[1] = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_accely"));
@@ -365,7 +370,8 @@ gboolean controllerHandlerTimeout(gpointer data)
       setRollingControlSensitive(true);
       setMotionsSensitive(true);
       showJoint4Widgets();
-      gtk_image_set_from_file(GTK_IMAGE(w), "interface/imobot_diagram.png");
+      sprintf(buf, "%s/imobot_diagram.png", g_interfaceDir);
+      gtk_image_set_from_file(GTK_IMAGE(w), buf);
       w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorPos2"));
       gtk_range_set_range(GTK_RANGE(w), -90, 90);
       w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorPos3"));
@@ -381,7 +387,8 @@ gboolean controllerHandlerTimeout(gpointer data)
       setRollingControlSensitive(false);
       setMotionsSensitive(false);
       hideJoint4Widgets();
-      gtk_image_set_from_file(GTK_IMAGE(w), "interface/DOF_joint_diagram.png");
+      sprintf(buf, "%s/DOF_joint_diagram.png", g_interfaceDir);
+      gtk_image_set_from_file(GTK_IMAGE(w), buf);
       w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorPos2"));
       gtk_range_set_range(GTK_RANGE(w), -180, 180);
       w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorPos3"));
@@ -392,7 +399,8 @@ gboolean controllerHandlerTimeout(gpointer data)
       setMotorWidgetsSensitive(2, false);
       setMotorWidgetsSensitive(3, true);
       setMotorWidgetsSensitive(4, false);
-      gtk_image_set_from_file(GTK_IMAGE(w), "interface/DOF_joint_diagram.png");
+      sprintf(buf, "%s/DOF_joint_diagram.png", g_interfaceDir);
+      gtk_image_set_from_file(GTK_IMAGE(w), buf);
       setColorWidgetSensitive(true);
       setAccelWidgetSensitive(true);
       setRollingControlSensitive(true);
@@ -413,7 +421,8 @@ gboolean controllerHandlerTimeout(gpointer data)
       setRollingControlSensitive(true);
       setMotionsSensitive(true);
       showJoint4Widgets();
-      gtk_image_set_from_file(GTK_IMAGE(w), "interface/imobot_diagram.png");
+      sprintf(buf, "%s/imobot_diagram.png", g_interfaceDir);
+      gtk_image_set_from_file(GTK_IMAGE(w), buf);
       w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorPos2"));
       gtk_range_set_range(GTK_RANGE(w), -90, 90);
       w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorPos3"));
@@ -478,6 +487,8 @@ gboolean controllerHandlerTimeout(gpointer data)
     /* Set acceleration sliders */
     for(i = 0; i < 4; i++) {
       gtk_range_set_value(GTK_RANGE(vscale_accel[i]), g_accelerationValues[i]);
+      sprintf(buf, "%0.2lf", g_accelerationValues[i]);
+      gtk_label_set_text(GTK_LABEL(label_accel[i]), buf);
     }
   }
 

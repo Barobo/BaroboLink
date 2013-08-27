@@ -36,13 +36,17 @@ class CRobotManager : public ConfigFile
     CRobotManager();
     ~CRobotManager();
     int addEntry(const char* entry);
+    int addMobot(recordMobot_t* mobot);
     void moveMobot(int destIndex, int srcIndex);
     int moveEntryUp(int index);
     int moveEntryDown(int index);
     int insertEntry(const char* entry, int index);
     bool isConnected(int index);
+    bool isConnectedZigbee(uint16_t addr);
     bool isPlaying();
     int connectIndex(int index);
+    int connectSerialID(const char* id);
+    void connectZBAddr(uint16_t addr);
     int disconnect(int index);
     int disconnectAll();
     recordMobot_t* getUnboundMobot();
@@ -55,10 +59,13 @@ class CRobotManager : public ConfigFile
     void play();
     recordMobot_t* getMobot(int connectIndex);
     recordMobot_t* getMobotIndex(int index);
+    recordMobot_t* getMobotZBAddr(uint16_t addr);
     string* generateChProgram(bool looped = false, bool holdOnExit = false);
     string* generateCppProgram(bool looped = false, bool holdOnExit = false);
     string* generatePythonProgram(bool looped = false, bool holdOnExit = false);
     void generateInteractivePythonProgram(GtkVBox *vbox, bool looped = false, bool holdOnExit = false);
+    int setMobotByIndex(int index, recordMobot_t* mobot);
+    int setMobotBySerialID(const char* id, recordMobot_t* mobot);
     bool _isPlaying;
     int _newDndIndex;
   private:

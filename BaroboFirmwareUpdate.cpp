@@ -36,6 +36,8 @@
 
 #define MAX_THREADS 40
 
+#undef strdup
+
 typedef enum dongleSearchStatus_e
 {
   DONGLE_NIL,
@@ -300,7 +302,7 @@ int main(int argc, char* argv[])
   //g_signal_connect(GtkOSXMacmenu, "NSApplicationBlockTermination",
       //G_CALLBACK(app_should_quit_cb), NULL);
   GtkWidget* quititem = GTK_WIDGET(gtk_builder_get_object(g_builder, "imagemenuitem5"));
-  gtk_mac_menu_set_quit_menu_item(GTK_MENU_ITEM(quititem));
+  //gtk_mac_menu_set_quit_menu_item(GTK_MENU_ITEM(quititem));
 #endif
 
   /* Show the window */

@@ -21,15 +21,13 @@
 #include <string.h>
 #define PLAT_GTK 1
 #define GTK
-#include <Scintilla.h>
-#include <SciLexer.h>
-#include <ScintillaWidget.h>
 #include "BaroboLink.h"
 #include "RobotManager.h"
 #ifdef __MACH__
 #include <sys/types.h>
 #include <unistd.h>
 #include <gtk-mac-integration.h>
+#define MAX_PATH 4096
 #endif
 #include <sys/stat.h>
 #include "thread_macros.h"
@@ -41,9 +39,7 @@
 GtkBuilder *g_builder;
 GtkWidget *g_window;
 GtkWidget *g_scieditor;
-ScintillaObject *g_sci;
 GtkWidget *g_scieditor_ext;
-ScintillaObject *g_sci_ext;
 
 CRobotManager *g_robotManager;
 
@@ -51,9 +47,12 @@ char *g_interfaceFiles[512] = {
   "interface/interface.glade",
   "interface.glade",
   "../share/BaroboLink/interface.glade",
+  "/usr/share/BaroboLink/interface.glade",
   NULL,
   NULL
 };
+
+char *g_interfaceDir;
 
 int main(int argc, char* argv[])
 {
@@ -90,6 +89,11 @@ int main(int argc, char* argv[])
     g_interfaceFiles[3] = (char*)malloc(sizeof(char)*512);
     sprintf(g_interfaceFiles[3], "%s/BaroboLink/interface.glade", datadir);
   }
+  g_interfaceDir = strdup(datadir);
+#elif defined _WIN32
+  g_interfaceDir = strdup("interface");
+#else
+  g_interfaceDir = strdup("/usr/share/BaroboLink");
 #endif
 
   /* Load the UI */
@@ -128,7 +132,7 @@ int main(int argc, char* argv[])
   //g_signal_connect(GtkOSXMacmenu, "NSApplicationBlockTermination",
       //G_CALLBACK(app_should_quit_cb), NULL);
   GtkWidget* quititem = GTK_WIDGET(gtk_builder_get_object(g_builder, "imagemenuitem5"));
-  gtk_mac_menu_set_quit_menu_item(GTK_MENU_ITEM(quititem));
+  //gtk_mac_menu_set_quit_menu_item(GTK_MENU_ITEM(quititem));
 #endif
 
   /* Hide the Program dialog */
@@ -154,7 +158,6 @@ void initialize()
   g_notebookRoot = GTK_NOTEBOOK(gtk_builder_get_object(g_builder, "notebook_root"));
   g_reflashConnectSpinner = GTK_SPINNER(gtk_builder_get_object(g_builder, "spinner_reflashConnect"));
   initControlDialog();
-  initProgramDialog();
   initScanMobotsDialog();
   initializeComms();
 
@@ -265,11 +268,15 @@ void on_menuitem_demos_activate(GtkWidget *widget, gpointer data)
 #endif
 }
 
+#define Q(x) QUOTE(x)
+#define QUOTE(x) #x
+
 void on_imagemenuitem_about_activate(GtkWidget *widget, gpointer data)
 {
   /* Find the about dialog and show it */
   GtkWidget *w;
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "aboutdialog"));
+  gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(w), Q(BAROBOLINK_VERSION));
   gtk_dialog_run(GTK_DIALOG(w));
 }
 

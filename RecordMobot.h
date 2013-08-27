@@ -98,6 +98,7 @@ recordMobot_t* RecordMobot_new();
 void RecordMobot_init(recordMobot_t* mobot, const char *name);
 void RecordMobot_destroy(recordMobot_t* mobot);
 int RecordMobot_connectWithAddress(recordMobot_t* mobot, const char address[], int channel);
+int RecordMobot_connectWithZigbeeAddress(recordMobot_t* mobot, uint16_t addr);
 const char* RecordMobot_getAddress(recordMobot_t* mobot);
 int RecordMobot_record(recordMobot_t* mobot);
 int RecordMobot_addDelay(recordMobot_t* mobot, double seconds);

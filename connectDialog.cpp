@@ -100,12 +100,80 @@ struct connectThreadArg_s {
   int connectReturnVal;
 };
 
+void connectToChildren(mobot_t* master);
 void* connectThread(void* arg)
 {
+  int rc;
   struct connectThreadArg_s* a;
   a = (struct connectThreadArg_s*)arg;
   a->connectReturnVal = g_robotManager->connectIndex(a->connectIndex);
+  mobot_t* mobot;
+  mobot = (mobot_t*)g_robotManager->getMobotIndex(a->connectIndex);
+  uint16_t addr;
+  Mobot_getMasterAddress(mobot, &addr);
+  recordMobot_t* master;
+  if(addr == mobot->zigbeeAddr) {
+    /* We just connected to the master */
+    connectToChildren(mobot);
+  }
+  else if(addr != 0) {
+    /* Check to see if the master is already connected */
+    if(!g_robotManager->isConnectedZigbee(addr)) {
+      /* We have to connect to it to find its serial ID */
+      master = RecordMobot_new();
+      RecordMobot_init(master, "Linkbot");
+      rc = RecordMobot_connectWithZigbeeAddress(master, addr);
+      if(rc) {
+        a->connectionCompleted=1;
+        return NULL;
+      }
+      /* Add the master to the list of robots if it's not in there already */
+      g_robotManager->addMobot((recordMobot_t*)master);
+    } else {
+      master = g_robotManager->getMobotZBAddr(addr);
+    }
+    if( (master == NULL) || (master->mobot.connected == 0) ) {
+      a->connectionCompleted = 1;
+      return NULL;
+    } else {
+      /* Connect to all of the master's children */
+      connectToChildren((mobot_t*)master);
+    }
+    /* TODO Here, we want to get all of the poses from each child. */
+  }
   a->connectionCompleted = 1;
+  return NULL;
+}
+
+void connectToChildren(mobot_t* master)
+{
+  int rc;
+  int numslaves;
+  rc = Mobot_getNumSlaves(master, &numslaves);
+  if(rc) return;
+  int i;
+  uint16_t zbaddr;
+  recordMobot_t* mobot;
+  mobot_t tmpMobot;
+  for(i = 0; i < numslaves; i++) {
+    rc = Mobot_getSlaveAddr(master, i, &zbaddr);
+    if(rc) return;
+    /* See if the robot is already an entry */
+    mobot = g_robotManager->getMobotZBAddr(zbaddr);
+    /* If not, we need to get its serial ID and add it to the robotmanager */
+    if(NULL == mobot) {
+      Mobot_init(&tmpMobot);
+      Mobot_connectWithZigbeeAddress(&tmpMobot, zbaddr);
+      if(!g_robotManager->entryExists(tmpMobot.serialID)) {
+        g_robotManager->addEntry(tmpMobot.serialID);
+      }
+      Mobot_disconnect(&tmpMobot);
+      /* Connect to the serial ID */
+      g_robotManager->connectSerialID(tmpMobot.serialID);
+    } else {
+      /* The robot is already connected */
+    }
+  }
 }
 
 gboolean progressBarConnectUpdate(gpointer data)
@@ -177,6 +245,7 @@ gboolean progressBarConnectUpdate(gpointer data)
         GTK_WIDGET(gtk_builder_get_object(g_builder, "dialog_connectFailed")));
     }
     refreshConnectDialog();
+    teachingDialog_refreshRecordedMotions(-1);
     free(a);
     free(buf);
     return FALSE;
