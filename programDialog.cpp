@@ -575,23 +575,6 @@ gboolean check_io_timeout(gpointer data)
   return TRUE;
 }
 
-void refreshExternalEditor()
-{
-  static GtkWidget *root_vbox = NULL;
-  if(root_vbox != NULL) {
-    gtk_widget_destroy(root_vbox);
-  }
-  root_vbox = gtk_vbox_new(FALSE, 0);
-  g_robotManager->generateInteractivePythonProgram(GTK_VBOX(root_vbox), false, false);
-  GtkWidget *layout = GTK_WIDGET(gtk_builder_get_object(g_builder, "layout1"));
-  GtkRequisition sizeRequest;
-  gtk_widget_size_request(root_vbox, &sizeRequest);
-  gtk_layout_set_size(GTK_LAYOUT(layout), sizeRequest.width, sizeRequest.height);
-  gtk_layout_put(GTK_LAYOUT(layout), root_vbox, 0, 0);
-  gtk_widget_show(root_vbox);
-  gtk_widget_show(layout);
-}
-
 void on_button_copyExternalToClipboard_clicked(GtkWidget *w, gpointer data)
 {
   int size = scintilla_send_message(g_sci_ext, SCI_GETLENGTH, 0, 0) + 1;

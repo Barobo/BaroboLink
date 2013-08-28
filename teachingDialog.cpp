@@ -65,7 +65,25 @@ void teachingDialog_refreshRecordedMotions(int currentMotion)
           -1);
     }
   }
+  refreshExternalEditor();
   g_dnd = true;
+}
+
+void refreshExternalEditor()
+{
+  static GtkWidget *root_vbox = NULL;
+  if(root_vbox != NULL) {
+    gtk_widget_destroy(root_vbox);
+  }
+  root_vbox = gtk_vbox_new(FALSE, 0);
+  g_robotManager->generateInteractivePythonProgram(GTK_VBOX(root_vbox), false, false);
+  GtkWidget *layout = GTK_WIDGET(gtk_builder_get_object(g_builder, "layout1"));
+  GtkRequisition sizeRequest;
+  gtk_widget_size_request(root_vbox, &sizeRequest);
+  gtk_layout_set_size(GTK_LAYOUT(layout), sizeRequest.width, sizeRequest.height);
+  gtk_layout_put(GTK_LAYOUT(layout), root_vbox, 0, 0);
+  gtk_widget_show(root_vbox);
+  gtk_widget_show(layout);
 }
 
 void on_button_setJointsNeutral_clicked(GtkWidget*w, gpointer data)
