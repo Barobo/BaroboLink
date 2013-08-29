@@ -76,7 +76,13 @@ void refreshExternalEditor()
     gtk_widget_destroy(root_vbox);
   }
   root_vbox = gtk_vbox_new(FALSE, 0);
-  g_robotManager->generateInteractivePythonProgram(GTK_VBOX(root_vbox), false, false);
+  bool playLooped;
+  GtkWidget *w;
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "checkbutton_playLooped"));
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))) {
+    playLooped = true;
+  }  
+  g_robotManager->generateInteractivePythonProgram(GTK_VBOX(root_vbox), playLooped, g_holdOnExit);
   GtkWidget *layout = GTK_WIDGET(gtk_builder_get_object(g_builder, "layout1"));
   GtkRequisition sizeRequest;
   gtk_widget_size_request(root_vbox, &sizeRequest);
