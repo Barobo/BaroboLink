@@ -55,6 +55,13 @@ void* findDongleThread(void* arg)
     g_dongle = mobot;
     COND_SIGNAL(&foundDongle_cond);
     MUTEX_UNLOCK(&foundDongle_lock);
+  } else if (!Mobot_connectWithTTY_500kbaud((mobot_t*)mobot, buf)) {
+    MUTEX_LOCK(&foundDongle_lock);
+    foundDongle = 1;
+    foundDonglePort = portnum;
+    g_dongle = mobot;
+    COND_SIGNAL(&foundDongle_cond);
+    MUTEX_UNLOCK(&foundDongle_lock);
   } else {
     Mobot_disconnect((mobot_t*)mobot);
     free(mobot);
@@ -152,9 +159,9 @@ int findDongle(void)
   /* At this point, all worker threads have been started, but a dongle has not
    * yet been found... Wait for 1 second, and only 1 second */
 #ifdef _WIN32
-  Sleep(1000);
+  Sleep(4000);
 #else
-  sleep(1);
+  sleep(4);
 #endif
   MUTEX_LOCK(&foundDongle_lock);
   if(foundDongle) {
@@ -193,13 +200,16 @@ void askConnectDongle(void)
   GtkWidget* d = gtk_message_dialog_new(
       GTK_WINDOW(gtk_builder_get_object(g_builder, "window1")),
       GTK_DIALOG_DESTROY_WITH_PARENT,
-      GTK_MESSAGE_QUESTION,
-      GTK_BUTTONS_YES_NO,
-      "There is currently no Linkbot dongle associated with BaroboLink. Would you like to add one now?");
+      GTK_MESSAGE_ERROR,
+      GTK_BUTTONS_OK,
+      "No attached dongle could be detected on this computer. Please check the following items to ensure the best connection to your Linkbot:\n"
+      "- The Linkbot is turned on.\n"
+      "- The robot's 4 digit serial ID has been entered correctly.\n"
+      "- The device driver for the Linkbot has been installed.\n"
+      "- The USB cable is firmly plugged into both the computer and the Linkbot.\n"
+      "- The USB cable is in good working order.\n"
+      "- If the previous five steps do not work, try restarting both the robot and BaroboLink.\n");
   int rc = gtk_dialog_run(GTK_DIALOG(d));
-  if(rc == GTK_RESPONSE_YES) {
-    showConnectDongleDialog();
-  }
   gtk_widget_destroy(d);
 }
 
