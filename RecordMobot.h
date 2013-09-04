@@ -119,6 +119,7 @@ int RecordMobot_moveMotion(recordMobot_t* mobot, int fromindex, int toindex);
 int RecordMobot_swapMotion(recordMobot_t* mobot, int index1, int index2);
 void RecordMobot_setName(recordMobot_t* mobot, const char* name);
 recordMobotConnectStatus_t RecordMobot_connectStatus(recordMobot_t* mobot);
+void motion_update(struct motion_s* motion);
 #ifdef __cplusplus
 }
 #endif

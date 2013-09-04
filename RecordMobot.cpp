@@ -189,6 +189,7 @@ int RecordMobot_play(recordMobot_t* mobot, int index)
 		return -1;
 	}
 	if(mobot->motions[index]->motionType == MOTION_POS) {
+    /* Make sure the motion angles are up to date with the gtkentries */
 		return Mobot_moveToNB( (mobot_t*)mobot,
 			mobot->motions[index]->data.pos[0],
 			mobot->motions[index]->data.pos[1],
@@ -428,7 +429,7 @@ int RecordMobot_getPythonInteractiveMotionString(GtkWidget* vbox, recordMobot_t*
           gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[3], TRUE, TRUE, 0);
           gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(")"), TRUE, TRUE, 0);
           gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
-          gtk_widget_show(hbox);
+          gtk_widget_show_all(hbox);
           break;
         case MOBOTFORM_L:
           sprintf(buf, "%s.moveTo(%.2lf, %.2lf, 0)",
@@ -554,4 +555,20 @@ void RecordMobot_setName(recordMobot_t* mobot, const char* name)
 recordMobotConnectStatus_t RecordMobot_connectStatus(recordMobot_t* mobot)
 {
   return mobot->connectStatus;
+}
+
+void motion_update(struct motion_s* motion)
+{
+  if(motion->motionType == MOTION_SLEEP) {
+    return;
+  }
+  int i;
+  const char* text;
+  for(i = 0; i < 4; i++) {
+    if(motion->angleEntries[i] == NULL) {
+      continue;
+    }
+    text = gtk_entry_get_text(GTK_ENTRY(motion->angleEntries[i]));
+    sscanf(text, "%lf", &motion->data.pos[i]);
+  }
 }
