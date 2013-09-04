@@ -360,12 +360,39 @@ gboolean poseGuiTimeout(gpointer userdata)
   return true;
 }
 
+void retrieveEntryValues(void)
+{
+  /* Get each connected recordMobot object and update their actual motion
+   * values with the values currently stored in the GtkEntries. */
+  int i, j, k;
+  recordMobot_t* mobot;
+  const char* text;
+  double angle;
+  for(i = 0; i < g_robotManager->numConnected(); i++) {
+    mobot = g_robotManager->getMobot(i);
+    for(j = 0; j < mobot->numMotions; j++) {
+      if(mobot->motions[j]->motionType == MOTION_SLEEP) {
+        continue;
+      }
+      for(k = 0; k < 4; i++) {
+        if(mobot->motions[j]->angleEntries[k] == NULL) {
+          continue;
+        }
+        text = gtk_entry_get_text(GTK_ENTRY(mobot->motions[j]->angleEntries[k]));
+        sscanf(text, "%lf", &angle);
+        mobot->motions[j]->data.pos[k] = angle;
+      }
+    }
+  }
+}
+
 void on_button_playRecorded_clicked(GtkWidget*button, gpointer data) 
 {
   GtkWidget *w;
   /* Disable the play button */
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "button_playRecorded"));
   gtk_widget_set_sensitive(w, FALSE);
+  retrieveEntryValues();
   teachingDialog_refreshRecordedMotions(0);
   /* Start the play thread */
   g_haltPlayFlag = false;
