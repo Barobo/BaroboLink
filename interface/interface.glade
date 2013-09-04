@@ -2878,10 +2878,18 @@ Button A and B together: Clear Recorded Poses</property>
                             <property name="label_xalign">0</property>
                             <property name="shadow_type">out</property>
                             <child>
-                              <object class="GtkLayout" id="layout1">
+                              <object class="GtkScrolledWindow" id="scrolledwindow4">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="border_width">10</property>
+                                <property name="can_focus">True</property>
+                                <property name="hscrollbar_policy">automatic</property>
+                                <property name="vscrollbar_policy">automatic</property>
+                                <child>
+                                  <object class="GtkLayout" id="layout1">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="border_width">10</property>
+                                  </object>
+                                </child>
                               </object>
                             </child>
                             <child type="label">
