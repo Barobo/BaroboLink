@@ -374,13 +374,13 @@ void retrieveEntryValues(void)
       if(mobot->motions[j]->motionType == MOTION_SLEEP) {
         continue;
       }
-      for(k = 0; k < 4; i++) {
+      for(k = 0; k < 4; k++) {
         if(mobot->motions[j]->angleEntries[k] == NULL) {
           continue;
         }
         text = gtk_entry_get_text(GTK_ENTRY(mobot->motions[j]->angleEntries[k]));
         sscanf(text, "%lf", &angle);
-        mobot->motions[j]->data.pos[k] = angle;
+        mobot->motions[j]->data.pos[k] = DEG2RAD(angle);
       }
     }
   }

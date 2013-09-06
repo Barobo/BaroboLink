@@ -382,7 +382,7 @@ int RecordMobot_getPythonInteractiveMotionStringB(GtkWidget* vbox, recordMobot_t
           gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
           mobot->motions[index]->angleEntries[0] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[0]));
           gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
-          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(" 0, "), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", 0, "), TRUE, TRUE, 0);
           mobot->motions[index]->angleEntries[2] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[2]));
           gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[2], TRUE, TRUE, 0);
           gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(")"), TRUE, TRUE, 0);
@@ -425,7 +425,7 @@ int RecordMobot_getPythonInteractiveMotionString(GtkWidget* vbox, recordMobot_t*
           sprintf(buf, "%s.moveToNB(", mobot->name);
           gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
           gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
-          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(" 0, "), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", 0, "), TRUE, TRUE, 0);
           gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[3], TRUE, TRUE, 0);
           gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(")"), TRUE, TRUE, 0);
           gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
