@@ -462,6 +462,7 @@ int RecordMobot_getPythonInteractiveMotionString(GtkWidget* vbox, recordMobot_t*
           gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", 0)"), TRUE, TRUE, 0);
           gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
           gtk_widget_show_all(hbox);
+          break;
         case MOBOTFORM_ORIGINAL:
         default:
           sprintf(buf, "%s.moveToNB(", mobot->name);
