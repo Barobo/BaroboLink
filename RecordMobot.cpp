@@ -368,6 +368,7 @@ int RecordMobot_getPythonInteractiveMotionStringB(GtkWidget* vbox, recordMobot_t
 {
   /* Create a new HBox to pack into the vbox */
   char buf[128];
+  GtkWidget *widget;
   /* Create GTK Widgets */
   int i;
   for(i = 0; i < 4; i++) {
@@ -423,7 +424,16 @@ int RecordMobot_getPythonInteractiveMotionStringB(GtkWidget* vbox, recordMobot_t
       }
       break;
     case MOTION_SLEEP:
-      sprintf(buf, "time.sleep(%.2lf)", (mobot->motions[index]->data.sleepDuration));
+      widget = gtk_label_new("time.sleep( ");
+      gtk_misc_set_alignment(GTK_MISC(widget), 0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 0);
+      mobot->motions[index]->angleEntries[0] = create_angle_entry(mobot->motions[index]->data.sleepDuration);
+      gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], FALSE, FALSE, 0);
+      widget = gtk_label_new(")");
+      gtk_misc_set_alignment(GTK_MISC(widget), 0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+      gtk_widget_show_all(hbox);
       break;
   }
 	return 0;
@@ -433,6 +443,7 @@ int RecordMobot_getPythonInteractiveMotionString(GtkWidget* vbox, recordMobot_t*
 {
   /* Create a new HBox to pack into the vbox */
   char buf[128];
+  GtkWidget *widget;
   GtkWidget *hbox = gtk_hbox_new(false, 0);
   switch(mobot->motions[index]->motionType) {
     case MOTION_POS:
@@ -485,7 +496,16 @@ int RecordMobot_getPythonInteractiveMotionString(GtkWidget* vbox, recordMobot_t*
       }
       break;
     case MOTION_SLEEP:
-      sprintf(buf, "time.sleep(%.2lf)", (mobot->motions[index]->data.sleepDuration));
+      widget = gtk_label_new("time.sleep( ");
+      gtk_misc_set_alignment(GTK_MISC(widget), 0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 0);
+      mobot->motions[index]->angleEntries[0] = create_angle_entry(mobot->motions[index]->data.sleepDuration);
+      gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], FALSE, FALSE, 0);
+      widget = gtk_label_new(")");
+      gtk_misc_set_alignment(GTK_MISC(widget), 0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+      gtk_widget_show_all(hbox);
       break;
   }
 	return 0;
