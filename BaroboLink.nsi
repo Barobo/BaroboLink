@@ -8,7 +8,7 @@
 !define FIRMUP_APP_NAME "Barobo Firmware Update Utility"
 !define COMP_NAME "Barobo"
 !define WEB_SITE "http://www.barobo.com"
-!define SHORTVERSION "1.5.1"
+!define SHORTVERSION "1.5.2"
 !define VERSION "${SHORTVERSION}.00"
 !define COPYRIGHT "Barobo  © 2013"
 !define DESCRIPTION "Application"
@@ -123,6 +123,10 @@ File "pthreadGC2.dll"
 File "zlib1.dll"
 SetOutPath "$INSTDIR\Drivers"
 File "Barobo_Linkbot_Driver.exe"
+File "Barobo_Linkbot_Driver\barobo_linkbot_driver.cat"
+File "Barobo_Linkbot_Driver\Barobo_Linkbot_Driver.inf"
+File "Barobo_Linkbot_Driver\dpinst_x86.exe"
+File "Barobo_Linkbot_Driver\dpinst_x64.exe"
 SetOutPath "$INSTDIR\interface"
 File "interface\16px_move_back.png"
 File "interface\16px_move_back.svg"
@@ -197,12 +201,12 @@ CopyFiles $OUT\package\chbarobo\include\mobot.h $OUT\toolkit\include\mobot.h
 CopyFiles $OUT\package\chbarobo\include\linkbot.h $OUT\toolkit\include\linkbot.h
 
 # See if the Linkbot driver has been installed yet
-ReadRegStr $0 ${REG_ROOT} ${REG_DRIVER} "VERSION"
-${If} $0 == ""
-  # Install the driver
-  ExecWait "$INSTDIR\Drivers\Barobo_Linkbot_Driver.exe"
-  WriteRegStr ${REG_ROOT} ${REG_DRIVER} "VERSION" "1.0"
-${EndIf}
+#ReadRegStr $0 ${REG_ROOT} ${REG_DRIVER} "VERSION"
+#${If} $0 == ""
+#  # Install the driver
+#  ExecWait "$INSTDIR\Drivers\Barobo_Linkbot_Driver.exe"
+#  WriteRegStr ${REG_ROOT} ${REG_DRIVER} "VERSION" "1.0"
+#${EndIf}
 
 SectionEnd
 
