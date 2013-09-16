@@ -82,7 +82,7 @@ void refreshExternalEditor()
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))) {
     playLooped = true;
   }  
-  g_robotManager->generateInteractivePythonProgram(GTK_VBOX(root_vbox), playLooped, g_holdOnExit);
+  g_robotManager->generateInteractivePythonProgram(GTK_BOX(root_vbox), playLooped, g_holdOnExit);
   GtkWidget *layout = GTK_WIDGET(gtk_builder_get_object(g_builder, "layout1"));
   GtkRequisition sizeRequest;
   gtk_widget_size_request(root_vbox, &sizeRequest);

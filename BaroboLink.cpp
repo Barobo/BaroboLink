@@ -183,6 +183,15 @@ void initialize()
   if(rc) {
     gtk_label_set_text(l, "Not connected");
   }
+
+  /* Set the background color of the pose teaching dialog */
+  GtkWidget *widget;
+  widget = GTK_WIDGET(gtk_builder_get_object(g_builder, "layout1"));
+  GdkColor color;
+  color.red = 65535;
+  color.green = 65535;
+  color.blue = 65535;
+  gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, &color);
 }
 
 int getIterModelFromTreeSelection(GtkTreeView *treeView, GtkTreeModel **model, GtkTreeIter *iter)
