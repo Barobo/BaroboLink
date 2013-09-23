@@ -107,6 +107,10 @@ void* connectThread(void* arg)
   struct connectThreadArg_s* a;
   a = (struct connectThreadArg_s*)arg;
   a->connectReturnVal = g_robotManager->connectIndex(a->connectIndex);
+  if(a->connectReturnVal) {
+    a->connectionCompleted = 1;
+    return NULL;
+  }
   mobot_t* mobot;
   mobot = (mobot_t*)g_robotManager->getMobotIndex(a->connectIndex);
   uint16_t addr;
@@ -243,9 +247,10 @@ gboolean progressBarConnectUpdate(gpointer data)
     if(a->connectReturnVal) {
       gtk_widget_show(
         GTK_WIDGET(gtk_builder_get_object(g_builder, "dialog_connectFailed")));
+    } else {
+      teachingDialog_refreshRecordedMotions(-1);
     }
     refreshConnectDialog();
-    teachingDialog_refreshRecordedMotions(-1);
     free(a);
     free(buf);
     return FALSE;
