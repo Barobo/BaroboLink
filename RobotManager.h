@@ -53,6 +53,7 @@ class CRobotManager : public ConfigFile
     int numConnected();
     int numAvailable();
     void record();
+    void deletePose(int pose);
     int remove(int index);
     void restoreSavedMobot(int index);
     void addDelay(double seconds);
@@ -74,5 +75,9 @@ class CRobotManager : public ConfigFile
     /* _connectAddresses is an array of pointers to 
        ConfigFile::_addresses */
 };
+
+extern "C" {
+  void on_button_pose_close_clicked(GtkWidget *widget, void* userdata);
+}
 
 #endif

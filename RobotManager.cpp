@@ -228,6 +228,16 @@ void CRobotManager::record()
   }
 }
 
+void CRobotManager::deletePose(int pose)
+{
+  int i;
+  recordMobot_t* mobot;
+  for(i = 0; i < numConnected(); i++) {
+    mobot = getMobot(i);
+    RecordMobot_removeMotion(mobot, pose, TRUE);
+  }
+}
+
 int CRobotManager::remove(int index)
 {
   int rc;
@@ -814,9 +824,17 @@ void CRobotManager::generateInteractivePythonProgram(GtkBox *vbox, bool looped, 
       box_insert_line(GTK_BOX(box), buf.c_str());
 
       /* Now pack a "close" button next to the pose name */
-      widget = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-      gtk_button_set_use_stock(GTK_BUTTON(widget), TRUE);
+      GtkWidget *image;
+      image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_SMALL_TOOLBAR);
+      gtk_widget_show(image);
+      widget = gtk_button_new();
+      gtk_button_set_image(GTK_BUTTON(widget), image);
       gtk_box_pack_start(GTK_BOX(box), widget, FALSE, FALSE, 0);
+      g_signal_connect(
+          G_OBJECT(widget), 
+          "clicked", 
+          G_CALLBACK(on_button_pose_close_clicked), 
+          (void*)i);
 
       gtk_widget_show_all(GTK_WIDGET(box));
       gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(box), TRUE, TRUE, 0);
@@ -868,4 +886,8 @@ void CRobotManager::generateInteractivePythonProgram(GtkBox *vbox, bool looped, 
 #endif
 }
 
-
+void on_button_pose_close_clicked(GtkWidget *widget, void* userdata)
+{
+  g_robotManager->deletePose((long int)userdata);
+  teachingDialog_refreshRecordedMotions(-1);
+}
