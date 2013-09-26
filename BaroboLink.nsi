@@ -8,7 +8,7 @@
 !define FIRMUP_APP_NAME "Barobo Firmware Update Utility"
 !define COMP_NAME "Barobo"
 !define WEB_SITE "http://www.barobo.com"
-!define SHORTVERSION "1.5.2"
+!define SHORTVERSION "1.5.3"
 !define VERSION "${SHORTVERSION}.00"
 !define COPYRIGHT "Barobo  © 2013"
 !define DESCRIPTION "Application"
@@ -201,12 +201,20 @@ CopyFiles $OUT\package\chbarobo\include\mobot.h $OUT\toolkit\include\mobot.h
 CopyFiles $OUT\package\chbarobo\include\linkbot.h $OUT\toolkit\include\linkbot.h
 
 # See if the Linkbot driver has been installed yet
-#ReadRegStr $0 ${REG_ROOT} ${REG_DRIVER} "VERSION"
-#${If} $0 == ""
+ReadRegStr $0 ${REG_ROOT} ${REG_DRIVER} "VERSION"
+${If} $0 == ""
 #  # Install the driver
-#  ExecWait "$INSTDIR\Drivers\Barobo_Linkbot_Driver.exe"
-#  WriteRegStr ${REG_ROOT} ${REG_DRIVER} "VERSION" "1.0"
-#${EndIf}
+#ExecWait "$INSTDIR\Drivers\Barobo_Linkbot_Driver.exe"
+  GetVersion::WindowsPlatformArchitecture
+  Pop $R0
+  ${If} $R0 == "64"
+    ExecWait '"$INSTDIR\Drivers\Barobo_Linkbot_Driver\dpinst_x64.exe /S"'
+  ${Else}
+    ExecWait '"$INSTDIR\Drivers\Barobo_Linkbot_Driver\dpinst_x86.exe /S"'
+  ${Endif}
+
+  WriteRegStr ${REG_ROOT} ${REG_DRIVER} "VERSION" "1.0"
+${EndIf}
 
 SectionEnd
 
