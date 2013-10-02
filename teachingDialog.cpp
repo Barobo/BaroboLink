@@ -76,7 +76,7 @@ void refreshExternalEditor()
     gtk_widget_destroy(root_vbox);
   }
   root_vbox = gtk_vbox_new(FALSE, 0);
-  bool playLooped;
+  bool playLooped = false;
   GtkWidget *w;
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "checkbutton_playLooped"));
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))) {
@@ -410,6 +410,7 @@ void on_button_stopRecorded_clicked(GtkWidget*w, gpointer data)
 void on_checkbutton_playLooped_clicked(GtkWidget*w, gpointer data)
 {
   g_playLooped = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w));
+  refreshExternalEditor();
 }
 
 gboolean refreshTimeout(gpointer userdata)
