@@ -39,10 +39,12 @@ void* findDongleThread(void* arg)
   int portnum = *(int*)arg;
   char buf[128];
   recordMobot_t* mobot;
-#ifndef _WIN32
-  sprintf(buf, "/dev/ttyACM%d", portnum);
-#else
+#ifdef __MACH__
+  sprintf(buf, "cu.usbmodem12%d1", portnum);
+#elif _WIN32
   sprintf(buf, "\\\\.\\COM%d", portnum);
+#else
+  sprintf(buf, "/dev/ttyACM%d", portnum);  
 #endif
 
   /* Try to connect to the port */
