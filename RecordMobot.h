@@ -107,6 +107,8 @@ int RecordMobot_play(recordMobot_t* mobot, int index);
 int RecordMobot_getMotionType(recordMobot_t* mobot, int index);
 int RecordMobot_getChMotionString(recordMobot_t* mobot, int index, char* buf);
 int RecordMobot_getChMotionStringB(recordMobot_t* mobot, int index, char* buf);
+int RecordMobot_getChInteractiveMotionStringB(GtkWidget* vbox, recordMobot_t* mobot, int index, const char* prefix = "");
+int RecordMobot_getChInteractiveMotionString(GtkWidget* vbox, recordMobot_t* mobot, int index, const char* prefix = "");
 int RecordMobot_getPythonMotionString(recordMobot_t* mobot, int index, char* buf);
 int RecordMobot_getPythonMotionStringB(recordMobot_t* mobot, int index, char* buf);
 int RecordMobot_getPythonInteractiveMotionString(GtkWidget* vbox, recordMobot_t* mobot, int index);

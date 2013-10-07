@@ -364,6 +364,155 @@ GtkWidget* create_angle_entry(double angle)
   return entry;
 }
 
+int RecordMobot_getChInteractiveMotionStringB(GtkWidget* vbox, recordMobot_t* mobot, int index, const char* prefix)
+{
+  /* Create a new HBox to pack into the vbox */
+  char buf[128];
+  GtkWidget *widget;
+  /* Create GTK Widgets */
+  int i;
+  for(i = 0; i < 4; i++) {
+    mobot->motions[index]->angleEntries[i] = NULL;
+  }
+  GtkWidget *hbox = gtk_hbox_new(false, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(prefix), TRUE, TRUE, 0);
+  switch(mobot->motions[index]->motionType) {
+    case MOTION_POS:
+      switch(mobot->mobot.formFactor) {
+        case MOBOTFORM_I:
+          sprintf(buf, "%s.moveTo(", mobot->name);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[0] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[0]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", 0, "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[2] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[2]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[2], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(");"), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+          gtk_widget_show_all(hbox);
+          break;
+        case MOBOTFORM_L:
+          sprintf(buf, "%s.moveTo(", mobot->name);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[0] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[0]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[1] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[1]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[1], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", 0);"), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+          gtk_widget_show_all(hbox);
+          break;
+        case MOBOTFORM_ORIGINAL:
+        default:
+          sprintf(buf, "%s.moveTo(", mobot->name);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[0] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[0]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[1] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[1]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[1], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[2] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[2]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[2], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[3] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[3]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[3], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(");"), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+          gtk_widget_show_all(hbox);
+          break;
+      }
+      break;
+    case MOTION_SLEEP:
+      widget = gtk_label_new("delay( ");
+      gtk_misc_set_alignment(GTK_MISC(widget), 0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 0);
+      mobot->motions[index]->angleEntries[0] = create_angle_entry(mobot->motions[index]->data.sleepDuration);
+      gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], FALSE, FALSE, 0);
+      widget = gtk_label_new(");");
+      gtk_misc_set_alignment(GTK_MISC(widget), 0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+      gtk_widget_show_all(hbox);
+      break;
+  }
+	return 0;
+}
+
+int RecordMobot_getChInteractiveMotionString(GtkWidget* vbox, recordMobot_t* mobot, int index, const char* prefix)
+{
+  /* Create a new HBox to pack into the vbox */
+  char buf[128];
+  GtkWidget *widget;
+  GtkWidget *hbox = gtk_hbox_new(false, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(prefix), TRUE, TRUE, 0);
+  switch(mobot->motions[index]->motionType) {
+    case MOTION_POS:
+      switch(mobot->mobot.formFactor) {
+        case MOBOTFORM_I:
+          sprintf(buf, "%s.moveToNB(", mobot->name);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[0] = 
+            create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[0]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", 0, "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[2] = 
+            create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[2]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[2], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(");"), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+          gtk_widget_show_all(hbox);
+          break;
+        case MOBOTFORM_L:
+          sprintf(buf, "%s.moveToNB(", mobot->name);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[0] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[0]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[1] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[1]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[1], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", 0);"), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+          gtk_widget_show_all(hbox);
+          break;
+        case MOBOTFORM_ORIGINAL:
+        default:
+          sprintf(buf, "%s.moveToNB(", mobot->name);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(buf), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[0] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[0]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[1] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[1]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[1], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[2] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[2]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[2], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(", "), TRUE, TRUE, 0);
+          mobot->motions[index]->angleEntries[3] = create_angle_entry(RAD2DEG(mobot->motions[index]->data.pos[3]));
+          gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[3], TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(");"), TRUE, TRUE, 0);
+          gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+          gtk_widget_show_all(hbox);
+          break;
+      }
+      break;
+    case MOTION_SLEEP:
+      widget = gtk_label_new("delay( ");
+      gtk_misc_set_alignment(GTK_MISC(widget), 0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 0);
+      mobot->motions[index]->angleEntries[0] = create_angle_entry(mobot->motions[index]->data.sleepDuration);
+      gtk_box_pack_start(GTK_BOX(hbox), mobot->motions[index]->angleEntries[0], FALSE, FALSE, 0);
+      widget = gtk_label_new(");");
+      gtk_misc_set_alignment(GTK_MISC(widget), 0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+      gtk_widget_show_all(hbox);
+      break;
+  }
+	return 0;
+}
+
 int RecordMobot_getPythonInteractiveMotionStringB(GtkWidget* vbox, recordMobot_t* mobot, int index)
 {
   /* Create a new HBox to pack into the vbox */

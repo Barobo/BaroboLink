@@ -221,7 +221,7 @@ G_MODULE_EXPORT void on_liststore_recordedMotions_row_inserted(
 void* playThread(void* arg);
 gboolean poseGuiTimeout(gpointer userdata);
 extern bool g_holdOnExit;
-G_MODULE_EXPORT void on_combobox_outputLanguage_changed(GtkComboBox *w, gpointer data);
+G_MODULE_EXPORT void on_combobox_poseLanguage_changed(GtkComboBox *w, gpointer data);
 void retrieveEntryValues(void);
 void teachingDialog_refreshRecordedMotions(int currentMotion);
 

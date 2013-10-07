@@ -82,7 +82,21 @@ void refreshExternalEditor()
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))) {
     playLooped = true;
   }  
-  g_robotManager->generateInteractivePythonProgram(GTK_BOX(root_vbox), playLooped, g_holdOnExit);
+  GtkWidget* combobox;
+  combobox = GTK_WIDGET(gtk_builder_get_object(g_builder, "combobox_poseLanguage"));
+  int languageindex = gtk_combo_box_get_active(GTK_COMBO_BOX(combobox));
+  char defaultFilename[128];
+  switch(languageindex) {
+    case 0: // C++/Ch
+      g_robotManager->generateInteractiveChProgram(GTK_BOX(root_vbox), playLooped, g_holdOnExit);
+      break;
+    case 1:
+      g_robotManager->generateInteractiveCppProgram(GTK_BOX(root_vbox), playLooped, g_holdOnExit);
+      break;
+    case 2: // Python
+      g_robotManager->generateInteractivePythonProgram(GTK_BOX(root_vbox), playLooped, g_holdOnExit);
+      break;
+  }
   GtkWidget *layout = GTK_WIDGET(gtk_builder_get_object(g_builder, "layout1"));
   GtkRequisition sizeRequest;
   gtk_widget_size_request(root_vbox, &sizeRequest);
@@ -662,6 +676,7 @@ void on_liststore_recordedMotions_row_inserted(
   }
 }
    
-void on_combobox_outputLanguage_changed(GtkComboBox *w, gpointer data)
+void on_combobox_poseLanguage_changed(GtkComboBox *w, gpointer data)
 {
+  refreshExternalEditor();
 }

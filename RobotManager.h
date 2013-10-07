@@ -64,6 +64,8 @@ class CRobotManager : public ConfigFile
     string* generateChProgram(bool looped = false, bool holdOnExit = false);
     string* generateCppProgram(bool looped = false, bool holdOnExit = false);
     string* generatePythonProgram(bool looped = false, bool holdOnExit = false);
+    void generateInteractiveChProgram(GtkBox *vbox, bool looped = false, bool holdOnExit = false);
+    void generateInteractiveCppProgram(GtkBox *vbox, bool looped = false, bool holdOnExit = false);
     void generateInteractivePythonProgram(GtkBox *vbox, bool looped = false, bool holdOnExit = false);
     int setMobotByIndex(int index, recordMobot_t* mobot);
     int setMobotBySerialID(const char* id, recordMobot_t* mobot);
