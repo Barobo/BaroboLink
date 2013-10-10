@@ -88,8 +88,10 @@ int main(int argc, char* argv[])
   if(datadir != NULL) {
     g_interfaceFiles[3] = (char*)malloc(sizeof(char)*512);
     sprintf(g_interfaceFiles[3], "%s/BaroboLink/interface.glade", datadir);
+    g_interfaceDir = strdup(datadir);
+  } else {
+    g_interfaceDir = strdup("interface");
   }
-  g_interfaceDir = strdup(datadir);
 #elif defined _WIN32
   g_interfaceDir = strdup("interface");
 #else
