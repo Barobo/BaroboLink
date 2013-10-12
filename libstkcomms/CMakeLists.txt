@@ -15,6 +15,8 @@ if(CMAKE_HOST_WIN32)
 	target_link_libraries(stkcomms Ws2_32)
   #set_target_properties(stkcomms PROPERTIES COMPILE_FLAGS "/GS-")
 elseif(CMAKE_HOST_APPLE)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -arch i386")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch i386")
   set(CMAKE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 	add_definitions(-DBUILD_CSTKCOMMS)
   add_library(stkcomms STATIC

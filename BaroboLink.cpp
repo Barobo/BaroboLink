@@ -28,10 +28,6 @@
 
 #define PLAT_GTK 1
 #define GTK
-
-#include <Scintilla.h>
-#include <SciLexer.h>
-#include <ScintillaWidget.h>
 #include "BaroboLink.h"
 #include "RobotManager.h"
 
@@ -59,9 +55,7 @@
 GtkBuilder *g_builder;
 GtkWidget *g_window;
 GtkWidget *g_scieditor;
-ScintillaObject *g_sci;
 GtkWidget *g_scieditor_ext;
-ScintillaObject *g_sci_ext;
 
 CRobotManager *g_robotManager;
 
@@ -249,8 +243,10 @@ int main(int argc, char* argv[])
   if(datadir != NULL) {
     g_interfaceFiles[3] = (char*)malloc(sizeof(char)*512);
     sprintf(g_interfaceFiles[3], "%s/BaroboLink/interface.glade", datadir);
+    g_interfaceDir = strdup(datadir);
+  } else {
+    g_interfaceDir = strdup("interface");
   }
-  g_interfaceDir = strdup(datadir);
 #elif defined _WIN32
   g_interfaceDir = strdup("interface");
 #else
@@ -329,13 +325,10 @@ void initialize()
   g_notebookRoot = GTK_NOTEBOOK(gtk_builder_get_object(g_builder, "notebook_root"));
   g_reflashConnectSpinner = GTK_SPINNER(gtk_builder_get_object(g_builder, "spinner_reflashConnect"));
   initControlDialog();
-  initProgramDialog();
   initScanMobotsDialog();
   initializeComms();
 
   /* Try to connect to a DOF dongle if possible */
-  g_mobotParent = (recordMobot_t*)malloc(sizeof(recordMobot_t));
-  RecordMobot_init(g_mobotParent, "DONGLE");
   const char *dongle;
   int i, rc;
   GtkLabel* l = GTK_LABEL(gtk_builder_get_object(g_builder, "label_connectDongleCurrentPort"));
@@ -345,6 +338,8 @@ void initialize()
       i++, dongle = g_robotManager->getDongle(i)
      ) 
   {
+    g_mobotParent = (recordMobot_t*)malloc(sizeof(recordMobot_t));
+    RecordMobot_init(g_mobotParent, "DONGLE");
     rc = Mobot_connectWithTTY((mobot_t*)g_mobotParent, dongle);
     if(rc == 0) {
       Mobot_setDongleMobot((mobot_t*)g_mobotParent);

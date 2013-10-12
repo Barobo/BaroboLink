@@ -22,6 +22,14 @@ if(CMAKE_HOST_WIN32)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -mms-bitfields -mwindows")
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g -mms-bitfields")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -mms-bitfields")
+elseif(APPLE)
+  include(FindPkgConfig)
+  pkg_check_modules(GTK2 REQUIRED gtk+-2.0 )
+  pkg_check_modules(GTKMAC REQUIRED gtk-mac-integration)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -arch i386")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch i386")
+  include_directories(${GTKMAC_INCLUDE_DIRS})
+  link_directories(${GTKMAC_LIBRARY_DIRS})
 else(CMAKE_HOST_WIN32)
   set(GTK2_ADDITIONAL_SUFFIXES)
   find_package(GTK2 2.6 REQUIRED gtk glade )
@@ -35,7 +43,6 @@ if(GTK2_FOUND)
   include_directories(${CMAKE_SOURCE_DIR}/libbarobo)
   include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
   include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile/mxml-2.7)
-  include_directories(${CMAKE_SOURCE_DIR}/scintilla/include)
   include_directories(${LIBSTKCOMMS_SOURCE_DIR})
   link_directories(${LIBSTKCOMMS_BINARY_DIR})
   link_directories(${GTK2_LIBRARY_DIRS})
@@ -49,7 +56,6 @@ if(GTK2_FOUND)
       connectDialog.cpp
       connectDongleDialog.cpp
       controlDialog.cpp
-      programDialog.cpp
       RecordMobot.cpp
       BaroboLink.cpp
       RobotManager.cpp
@@ -62,19 +68,22 @@ if(GTK2_FOUND)
 if(CMAKE_HOST_WIN32)
   target_link_libraries(
       BaroboLink
-      ${CMAKE_SOURCE_DIR}/scintilla/bin/scintilla.a 
       stkcomms 
       baroboStatic
       ${CMAKE_SOURCE_DIR}/BaroboLink.res
       ${GTK2_LIBRARIES} 
-      ${PYTHON_LIBRARIES})
+      ${PYTHON_LIBRARIES}
+      pthread)
   target_link_libraries(
       BaroboFirmwareUpdate
       stkcomms 
       baroboStatic
       ${GTK2_LIBRARIES} )
+elseif(APPLE)
+  target_link_libraries(BaroboLink baroboStatic stkcomms pthread ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES} ${PYTHON_LIBRARIES} )
+  target_link_libraries(BaroboFirmwareUpdate baroboStatic stkcomms pthread ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES} )
 else()
-  target_link_libraries(BaroboLink baroboStatic ${CMAKE_SOURCE_DIR}/scintilla/bin/scintilla.a stkcomms pthread bluetooth ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES} )
+  target_link_libraries(BaroboLink baroboStatic stkcomms pthread bluetooth ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES} )
   target_link_libraries(BaroboFirmwareUpdate baroboStatic stkcomms pthread ${GTK2_LIBRARIES} )
   install(TARGETS BaroboLink BaroboFirmwareUpdate
           RUNTIME DESTINATION bin )
