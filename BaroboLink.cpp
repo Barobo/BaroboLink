@@ -22,9 +22,11 @@
 #define WINVER 0x0501   // Tell Windows headers we're targeting WinXP
 #endif
 
+#include "split.hpp"
+
 #include <gtk/gtk.h>
-#include <string.h>
-#include <assert.h>
+#include <cstring>
+#include <cassert>
 
 #define PLAT_GTK 1
 #define GTK
@@ -59,16 +61,13 @@ GtkWidget *g_scieditor_ext;
 
 CRobotManager *g_robotManager;
 
-char *g_interfaceFiles[512] = {
+std::vector<std::string> g_interfaceFiles;
+
+const char *g_interfaceFilesInit[] = {
   "interface/interface.glade",
   "interface.glade",
-  "../share/BaroboLink/interface.glade",
-  "/usr/share/BaroboLink/interface.glade",
-  NULL,
-  NULL
+  "../share/BaroboLink/interface.glade"
 };
-
-char *g_interfaceDir;
 
 #ifdef _WIN32
 WNDPROC g_oldWindowProc;
@@ -238,41 +237,50 @@ int main(int argc, char* argv[])
     exit(0);
   }
 #endif
-#ifdef __MACH__
-  char *datadir = getenv("XDG_DATA_DIRS");
-  if(datadir != NULL) {
-    g_interfaceFiles[3] = (char*)malloc(sizeof(char)*512);
-    sprintf(g_interfaceFiles[3], "%s/BaroboLink/interface.glade", datadir);
-    g_interfaceDir = strdup(datadir);
-  } else {
-    g_interfaceDir = strdup("interface");
+
+  /* hlh: This used to be ifdef __MACH__, but XDG is not a BSD-specific platform. */
+#ifndef _WIN32
+  for (int i = 0; i < sizeof(g_interfaceFilesInit) / sizeof(g_interfaceFilesInit[0]); ++i) {
+    g_interfaceFiles.push_back(std::string(g_interfaceFilesInit[i]));
   }
-#elif defined _WIN32
-  g_interfaceDir = strdup("interface");
-#else
-  g_interfaceDir = strdup("/usr/share/BaroboLink");
+
+  std::string datadir (getenv("XDG_DATA_DIRS"));
+
+  if(!datadir.empty()) {
+    std::vector<std::string> xdg_data_dirs = split_escaped(datadir, ':', '\\');
+    for (std::vector<std::string>::iterator it = xdg_data_dirs.begin();
+        xdg_data_dirs.end() != it; ++it) {
+      g_interfaceFiles.push_back(*it + std::string("/BaroboLink/interface.glade"));
+    }
+  }
+  else {
+    g_interfaceFiles.push_back(std::string("/usr/share/BaroboLink/interface.glade"));
+  }
 #endif
 
   /* Load the UI */
   /* Find ther interface file */
   struct stat s;
   int err;
-  int i;
-  for(i = 0; g_interfaceFiles[i] != NULL; i++) {
-    err = stat(g_interfaceFiles[i], &s);
+  bool iface_file_found = false;
+  for (std::vector<std::string>::iterator it = g_interfaceFiles.begin();
+      g_interfaceFiles.end() != it; ++it) {
+    printf("checking %s\n", it->c_str());
+    err = stat(it->c_str(), &s);
     if(err == 0) {
-      if( ! gtk_builder_add_from_file(g_builder, g_interfaceFiles[i], &error) )
+      if( ! gtk_builder_add_from_file(g_builder, it->c_str(), &error) )
       {
         g_warning("%s", error->message);
         //g_free(error);
         return -1;
       } else {
+        iface_file_found = true;
         break;
       }
     }
   }
 
-  if(g_interfaceFiles[i] == NULL) {
+  if (!iface_file_found) {
     /* Could not find the interface file */
     g_warning("Could not find interface file.");
     return -1;

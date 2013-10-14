@@ -30,8 +30,12 @@
 #define PLAT_GTK 1
 #define GTK
 #include <math.h>
+#ifndef RAD2DEG
 #define RAD2DEG(x) ((x)*180.0/M_PI)
+#endif
+#ifndef DEG2RAD
 #define DEG2RAD(x) ((x)*M_PI/180.0)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +55,6 @@ extern GtkWidget *g_scieditor;
 extern GtkWidget *g_scieditor_ext;
 extern recordMobot_t* g_activeMobot;
 extern recordMobot_t *g_mobotParent;
-extern char *g_interfaceDir;
 #ifdef _MSYS
 extern HANDLE g_activeMobotLock;
 #else
