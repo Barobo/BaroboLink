@@ -4,7 +4,7 @@ project(BaroboLink)
 
 add_subdirectory(libstkcomms)
 add_subdirectory(libbarobo)
-exec_program(cat ARGS VERSION.TXT OUTPUT_VARIABLE barobolink_version)
+exec_program(cat ARGS ${CMAKE_SOURCE_DIR}/VERSION.TXT OUTPUT_VARIABLE barobolink_version)
 add_definitions(-DBAROBOLINK_VERSION=${barobolink_version})
 
 if(CMAKE_HOST_WIN32)
