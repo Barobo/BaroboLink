@@ -102,7 +102,6 @@ else()
       interface/inch_left.svg
       interface/inch_right.svg
       interface/interface.glade
-      interface/interfacepatch.patch
       interface/lface_forward.svg
       interface/mobotfirmwareupdateinterface.glade
       interface/move_back.png
