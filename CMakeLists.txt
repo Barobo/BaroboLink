@@ -4,7 +4,7 @@ project(BaroboLink)
 
 add_subdirectory(libstkcomms)
 add_subdirectory(libbarobo)
-exec_program(cat ARGS VERSION.TXT OUTPUT_VARIABLE barobolink_version)
+exec_program(cat ARGS ${CMAKE_SOURCE_DIR}/VERSION.TXT OUTPUT_VARIABLE barobolink_version)
 add_definitions(-DBAROBOLINK_VERSION=${barobolink_version})
 
 if(CMAKE_HOST_WIN32)
@@ -144,7 +144,7 @@ if(CMAKE_SYSTEM_NAME MATCHES [Ll]inux)
   SET (CPACK_PACKAGING_INSTALL_PREFIX "/tmp")
   SET (CPACK_GENERATOR "DEB")
 
-  SET (VERSION 1.2.0)
+  SET (VERSION 1.5.4)
   SET (CPACK_DEBIAN_PACKAGE_VERSION ${VERSION})
   SET (CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
   SET (CPACK_DEBIAN_PACKAGE_SECTION "Science & Engineering")
