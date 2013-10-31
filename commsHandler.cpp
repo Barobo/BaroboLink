@@ -23,7 +23,7 @@
 #include "BaroboLink.h"
 #include "RecordMobot.h"
 #include "thread_macros.h"
-#ifndef _MSYS
+#ifndef _WIN32
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -129,7 +129,7 @@ void* listenThread(void* arg)
     }
 
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, 
-#ifdef _MSYS
+#ifdef _WIN32
           (const char*)&yes,
 #else
           &yes,
@@ -140,7 +140,7 @@ void* listenThread(void* arg)
     }
 
     if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-#ifdef _MSYS
+#ifdef _WIN32
       closesocket(sockfd);
 #else
       close(sockfd);
@@ -203,7 +203,7 @@ void* listenThread(void* arg)
     mobot = g_robotManager->getUnboundMobot();
     if(mobot == NULL) {
       /* No unconnected mobots found. Disconnect immediately */
-#ifdef _MSYS
+#ifdef _WIN32
       closesocket(new_fd);
 #else
       close(new_fd);
@@ -235,7 +235,7 @@ void* listenThread(void* arg)
 int initializeComms(void)
 {
   /* Initialize Winsock */
-#ifdef _MSYS
+#ifdef _WIN32
   WSADATA wsaData;
   if(WSAStartup(MAKEWORD(2,0), &wsaData) != 0) {
     fprintf(stderr, "WSAStartup Failed.\n");

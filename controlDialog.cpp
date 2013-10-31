@@ -29,7 +29,7 @@
 #include <mach-o/dyld.h>
 #endif
 
-#ifdef _MSYS
+#ifdef _WIN32
 #define sleep(x) _sleep(x)
 #endif
 

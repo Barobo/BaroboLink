@@ -17,9 +17,10 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef _MSYS
+#ifdef _WIN32
 /* hlh: This is here to support USB hotplug detection. */
-#define WINVER 0x0501   // Tell Windows headers we're targeting WinXP
+#define _WIN32_WINNT 0x0502   // Tell Windows headers we're targeting WinXP
+#define WINVER 0x0502
 #endif
 
 #include "split.hpp"
@@ -43,7 +44,7 @@
 #include <sys/stat.h>
 #include "thread_macros.h"
 
-#ifdef _MSYS
+#ifdef _WIN32
 #include "libbarobo/win32_error.h"
 #include <windows.h>
 #include <dbt.h>
@@ -238,12 +239,12 @@ int main(int argc, char* argv[])
   }
 #endif
 
-  /* hlh: This used to be ifdef __MACH__, but XDG is not a BSD-specific platform. */
-#ifndef _WIN32
   for (int i = 0; i < sizeof(g_interfaceFilesInit) / sizeof(g_interfaceFilesInit[0]); ++i) {
     g_interfaceFiles.push_back(std::string(g_interfaceFilesInit[i]));
   }
 
+  /* hlh: This used to be ifdef __MACH__, but XDG is not a BSD-specific platform. */
+#ifndef _WIN32
   std::string datadir (getenv("XDG_DATA_DIRS"));
 
   if(!datadir.empty()) {
@@ -377,7 +378,7 @@ int getIterModelFromTreeSelection(GtkTreeView *treeView, GtkTreeModel **model, G
 
 void on_menuitem_help_activate(GtkWidget *widget, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   /* Get the install path of BaroboLink from the registry */
   DWORD size;
   char path[1024];
@@ -414,7 +415,7 @@ void on_menuitem_help_activate(GtkWidget *widget, gpointer data)
 
 void on_menuitem_demos_activate(GtkWidget *widget, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
   memset(&si, 0, sizeof(STARTUPINFO));
@@ -460,7 +461,7 @@ void on_imagemenuitem_about_activate(GtkWidget *widget, gpointer data)
 void on_menuitem_installLinkbotDriver_activate(GtkWidget *widget, gpointer data)
 {
   /* Get the install path of BaroboLink from the registry */
-#ifdef _MSYS
+#ifdef _WIN32
   DWORD size;
   char path[1024];
   HKEY key;
@@ -507,7 +508,7 @@ void on_menuitem_installLinkbotDriver_activate(GtkWidget *widget, gpointer data)
 
 void on_aboutdialog_activate_link(GtkAboutDialog *label, gchar* uri, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   ShellExecuteA(
       NULL,
       "open",
