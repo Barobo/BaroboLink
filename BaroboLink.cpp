@@ -351,6 +351,7 @@ void initialize()
     RecordMobot_init(g_mobotParent, "DONGLE");
     rc = Mobot_connectWithTTY((mobot_t*)g_mobotParent, dongle);
     if(rc == 0) {
+      printf("(barobo) INFO: Dongle connected on %s\n", dongle);
       Mobot_setDongleMobot((mobot_t*)g_mobotParent);
       gtk_label_set_text(l, dongle);
       break;

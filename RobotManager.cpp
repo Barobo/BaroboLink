@@ -136,6 +136,7 @@ int CRobotManager::connectIndex(int index)
     _mobots[index] = RecordMobot_new();
   }
   RecordMobot_init(_mobots[index], name);
+  printf("(barobo) INFO: connecting %s on %s\n", name, getEntry(index));
   err = RecordMobot_connectWithAddress( _mobots[index], getEntry(index), 1 );
   return err;
 }
