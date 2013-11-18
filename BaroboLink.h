@@ -85,6 +85,7 @@ G_MODULE_EXPORT void on_button_scanMobots_clicked(GtkWidget* widget, gpointer da
 G_MODULE_EXPORT void on_colorDialog_color_set(GtkColorButton* w, gpointer data);
 G_MODULE_EXPORT void on_beep_button_pressed(GtkWidget *w, gpointer data);
 G_MODULE_EXPORT void on_beep_button_released(GtkWidget *w, gpointer data);
+G_MODULE_EXPORT void on_button_robotInfo_OK_clicked(GtkWidget* widget, gpointer data);
 void refreshConnectDialog();
 gboolean connectDialogPulse(gpointer data);
 
@@ -107,6 +108,7 @@ G_MODULE_EXPORT void on_button_scanMobotsRefresh_clicked(GtkWidget *w, gpointer 
 /* Reflashing Process */
 extern char g_reflashAddress[80];
 extern int g_reflashHWRev;
+G_MODULE_EXPORT void on_button_robotInfo_clicked(GtkWidget* widget, gpointer data);
 G_MODULE_EXPORT void on_button_updateFirmware_clicked(GtkWidget* widget, gpointer data);
 G_MODULE_EXPORT void on_button_cancelFlash_clicked(GtkWidget* widget, gpointer data);
 G_MODULE_EXPORT void on_button_reflashContinue_clicked(GtkWidget* widget, gpointer data);

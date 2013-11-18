@@ -589,19 +589,12 @@ void refreshConnectDialog()
         }
       }
     }
-    /* Maybe add an "Upgrade Firmware" button */
+    /* Add an "Info" button */
     if( (g_robotManager->getMobotIndex(i) != NULL) &&
-        (g_robotManager->getMobotIndex(i)->connectStatus == RMOBOT_CONNECTED) &&
-        (g_robotManager->getMobotIndex(i)->firmwareVersion < Mobot_protocolVersion()) ) 
+        (g_robotManager->getMobotIndex(i)->connectStatus == RMOBOT_CONNECTED)
+      )
     {
-      int form=0;
-      Mobot_getFormFactor((mobot_t*)g_robotManager->getMobotIndex(i), &form);
-      GdkColor color;
-      gdk_color_parse("yellow", &color);
-      w = gtk_button_new_with_label("Upgrade\nFirmware");
-      gtk_widget_modify_bg(w, GTK_STATE_NORMAL, &color);
-      gdk_color_parse("#FFFF22", &color);
-      gtk_widget_modify_bg(w, GTK_STATE_PRELIGHT, &color);
+      w = gtk_button_new_with_label("Info");
       gtk_widget_show(w);
       gtk_table_attach( GTK_TABLE(rootTable),
           w,
@@ -609,7 +602,7 @@ void refreshConnectDialog()
           i*3, (i*3)+2,
           GTK_FILL, GTK_FILL,
           2, 2);
-      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_updateFirmware_clicked), (void*)i);
+      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_robotInfo_clicked), (void*)i);
     }
     /* Add a horizontal separator */
     w = gtk_hseparator_new();

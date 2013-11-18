@@ -45,6 +45,65 @@ GtkProgressBar* g_reflashProgressBar;
 gboolean listenButtonHWRev(gpointer data);
 gboolean updateProgrammingProgressTimeout(gpointer data);
 
+void on_button_robotInfo_clicked(GtkWidget* widget, gpointer data)
+{
+  int index = (long)data;
+  char buf[80];
+  recordMobot_t* mobot = g_robotManager->getMobotIndex(index);
+  if(mobot == NULL) {
+    return;
+  }
+  GtkWidget *w, *w2;
+  double volts;
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "entry_robotModel"));
+  w2 = GTK_WIDGET(gtk_builder_get_object(g_builder, "entry_batteryLevel"));
+  switch(mobot->mobot.formFactor) {
+    case MOBOTFORM_ORIGINAL:
+      gtk_entry_set_text(GTK_ENTRY(w), "Mobot");
+      gtk_entry_set_text(GTK_ENTRY(w2), "N/A");
+      break;
+    case MOBOTFORM_I:
+      gtk_entry_set_text(GTK_ENTRY(w), "Linkbot-I");
+      Mobot_getBatteryVoltage((mobot_t*)mobot, &volts);
+      sprintf(buf, "%.2lf Volts", volts);
+      gtk_entry_set_text(GTK_ENTRY(w2), buf);
+      break;
+    case MOBOTFORM_L:
+      gtk_entry_set_text(GTK_ENTRY(w), "Linkbot-L");
+      Mobot_getBatteryVoltage((mobot_t*)mobot, &volts);
+      sprintf(buf, "%.2lf Volts", volts);
+      gtk_entry_set_text(GTK_ENTRY(w2), buf);
+      break;
+    default:
+      gtk_entry_set_text(GTK_ENTRY(w), "Unknown");
+      gtk_entry_set_text(GTK_ENTRY(w2), "N/A");
+      break;
+  }
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "entry_robotID"));
+  gtk_entry_set_text(GTK_ENTRY(w), g_robotManager->getEntry(index));
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "entry_firmwareVersion"));
+  sprintf(buf, "%d", Mobot_getVersion((mobot_t*)mobot));
+  gtk_entry_set_text(GTK_ENTRY(w), buf);
+  if(mobot->firmwareVersion < Mobot_protocolVersion()) {
+    gtk_widget_show(
+        GTK_WIDGET(gtk_builder_get_object(g_builder, "button_updateFirmware")));
+  } else {
+    gtk_widget_hide(
+        GTK_WIDGET(gtk_builder_get_object(g_builder, "button_updateFirmware")));
+  }
+
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "dialog_robotInfo"));
+  gtk_dialog_run(GTK_DIALOG(w));
+}
+
+void on_button_robotInfo_OK_clicked(GtkWidget* widget, gpointer data)
+{
+  GtkWidget *w;
+  w = GTK_WIDGET(gtk_builder_get_object(g_builder, "dialog_robotInfo"));
+  gtk_dialog_response(GTK_DIALOG(w), 0);
+  gtk_widget_hide(w);
+}
+
 void on_button_updateFirmware_clicked(GtkWidget* widget, gpointer data)
 {
   /* Try and grab the HW rev number from the robot */
