@@ -2760,7 +2760,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_new_activate" swapped="no"/>
                                   </object>
                                 </child>
                                 <child>
@@ -2771,7 +2770,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_open_activate" swapped="no"/>
                                   </object>
                                 </child>
                                 <child>
@@ -2782,7 +2780,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_save_activate" swapped="no"/>
                                   </object>
                                 </child>
                                 <child>
@@ -2793,7 +2790,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_saveAs_activate" swapped="no"/>
                                   </object>
                                 </child>
                               </object>
@@ -2818,7 +2814,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_undo_activate" swapped="no"/>
                                   </object>
                                 </child>
                                 <child>
@@ -2829,7 +2824,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_redo_activate" swapped="no"/>
                                   </object>
                                 </child>
                                 <child>
@@ -2847,7 +2841,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_cut_activate" swapped="no"/>
                                   </object>
                                 </child>
                                 <child>
@@ -2858,7 +2851,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_copy_activate" swapped="no"/>
                                   </object>
                                 </child>
                                 <child>
@@ -2869,7 +2861,6 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
-                                    <signal name="activate" handler="on_imagemenuitem_paste_activate" swapped="no"/>
                                   </object>
                                 </child>
                               </object>
@@ -2935,7 +2926,6 @@
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
                                     <property name="use_action_appearance">False</property>
-                                    <signal name="clicked" handler="on_button_runExe_clicked" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2979,7 +2969,6 @@
                                       <object class="GtkTextView" id="textview_programMessages">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <signal name="key-press-event" handler="on_textview_programMessages_key_press_event" swapped="no"/>
                                       </object>
                                     </child>
                                   </object>
@@ -3365,7 +3354,6 @@ Button A and B together: Clear Recorded Poses</property>
                                 <property name="receives_default">False</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="on_checkbutton_showExternalEditor_toggled" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -4169,7 +4157,6 @@ To begin, enter the Mobot's address into the text box below and click on the but
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-                <signal name="clicked" handler="on_button_copyExternalToClipboard_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
