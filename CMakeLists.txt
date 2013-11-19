@@ -24,6 +24,7 @@ if(CMAKE_HOST_WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -idirafter \"${WINSDK_INCLUDE_PATH}\" -idirafter \"${MSVC_INCLUDE_PATH}\"")
 
   #add_definitions(-D_MSYS -DMSYS)
+  add_definitions(-D_WIN32_WINNT=0x0502 -DWIN32_LEAN_AND_MEAN)
   message( "gtk cflags: ${GTK2_CFLAGS}" )
   #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GTK2_CFLAGS}")
   #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GTK2_CFLAGS}")

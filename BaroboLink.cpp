@@ -17,12 +17,6 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef _WIN32
-/* hlh: This is here to support USB hotplug detection. */
-#define _WIN32_WINNT 0x0502   // Tell Windows headers we're targeting WinXP
-#define WINVER 0x0502
-#endif
-
 #include "split.hpp"
 #include "arraylen.h"
 
@@ -48,6 +42,7 @@
 #ifdef _WIN32
 #include "libbarobo/win32_error.h"
 #include <windows.h>
+#include <shellapi.h>
 #include <dbt.h>
 #include <initguid.h>   // must be included before ddk/*, otherwise link error
                         // (because that makes complete sense)
