@@ -29,7 +29,10 @@
 #endif
 #else
 #include <winsock2.h>
-//#include <winsock2.h>
+#ifdef ENABLE_BLUETOOTH
+#include <basetyps.h>
+#include <ws2bth.h>
+#endif
 typedef unsigned char uint8_t;
 #define uint16_t UINT16
 /*

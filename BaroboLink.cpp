@@ -17,13 +17,8 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef _WIN32
-/* hlh: This is here to support USB hotplug detection. */
-#define _WIN32_WINNT 0x0502   // Tell Windows headers we're targeting WinXP
-#define WINVER 0x0502
-#endif
-
 #include "split.hpp"
+#include "arraylen.h"
 
 #include <gtk/gtk.h>
 #include <cstring>
@@ -47,6 +42,7 @@
 #ifdef _WIN32
 #include "libbarobo/win32_error.h"
 #include <windows.h>
+#include <shellapi.h>
 #include <dbt.h>
 #include <initguid.h>   // must be included before ddk/*, otherwise link error
                         // (because that makes complete sense)
@@ -62,9 +58,7 @@ GtkWidget *g_scieditor_ext;
 
 CRobotManager *g_robotManager;
 
-std::vector<std::string> g_interfaceFiles;
-
-const char *g_interfaceFilesInit[] = {
+const char *g_interfaceFiles[] = {
   "interface/interface.glade",
   "interface.glade",
   "../share/BaroboLink/interface.glade"
@@ -239,9 +233,8 @@ int main(int argc, char* argv[])
   }
 #endif
 
-  for (int i = 0; i < sizeof(g_interfaceFilesInit) / sizeof(g_interfaceFilesInit[0]); ++i) {
-    g_interfaceFiles.push_back(std::string(g_interfaceFilesInit[i]));
-  }
+  std::vector<std::string> interfaceFiles
+    (g_interfaceFiles, g_interfaceFiles + ARRAYLEN(g_interfaceFiles));
 
   /* hlh: This used to be ifdef __MACH__, but XDG is not a BSD-specific platform. */
 #ifndef _WIN32
@@ -251,11 +244,11 @@ int main(int argc, char* argv[])
     std::vector<std::string> xdg_data_dirs = split_escaped(datadir, ':', '\\');
     for (std::vector<std::string>::iterator it = xdg_data_dirs.begin();
         xdg_data_dirs.end() != it; ++it) {
-      g_interfaceFiles.push_back(*it + std::string("/BaroboLink/interface.glade"));
+      interfaceFiles.push_back(*it + std::string("/BaroboLink/interface.glade"));
     }
   }
   else {
-    g_interfaceFiles.push_back(std::string("/usr/share/BaroboLink/interface.glade"));
+    interfaceFiles.push_back(std::string("/usr/share/BaroboLink/interface.glade"));
   }
 #endif
 
@@ -264,8 +257,8 @@ int main(int argc, char* argv[])
   struct stat s;
   int err;
   bool iface_file_found = false;
-  for (std::vector<std::string>::iterator it = g_interfaceFiles.begin();
-      g_interfaceFiles.end() != it; ++it) {
+  for (std::vector<std::string>::iterator it = interfaceFiles.begin();
+      interfaceFiles.end() != it; ++it) {
     printf("checking %s\n", it->c_str());
     err = stat(it->c_str(), &s);
     if(err == 0) {
