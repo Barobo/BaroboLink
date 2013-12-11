@@ -78,9 +78,9 @@ Section "Install Linkbot Driver" SectionDriver
     GetVersion::WindowsPlatformArchitecture
     Pop $R0
     ${If} $R0 == "64"
-      ExecWait '"$TEMP\dpinst_x64.exe"'
+      ExecWait '"$TEMP\dpinst_x64.exe /S"'
     ${Else}
-      ExecWait '"$TEMP\dpinst_x86.exe"'
+      ExecWait '"$TEMP\dpinst_x86.exe /S"'
     ${Endif}
 #ExecWait '"$TEMP\installdriver.bat" > C:\Users\dko\junk2 2>&1' $2
 #    messageBox MB_OK "batfile returned $2"
