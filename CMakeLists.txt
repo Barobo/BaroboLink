@@ -4,15 +4,27 @@ project(BaroboLink)
 
 add_subdirectory(libstkcomms)
 add_subdirectory(libbarobo)
-exec_program(cat ARGS ${CMAKE_SOURCE_DIR}/VERSION.TXT OUTPUT_VARIABLE barobolink_version)
+exec_program(cat ARGS "\"${CMAKE_SOURCE_DIR}/VERSION.TXT\"" OUTPUT_VARIABLE barobolink_version)
 add_definitions(-DBAROBOLINK_VERSION=${barobolink_version})
+message("Configuring BaroboLink version " ${barobolink_version})
 
 if(CMAKE_HOST_WIN32)
   include(FindPkgConfig)
   pkg_check_modules(GTK2 REQUIRED gtk+-2.0)
   #pkg_check_modules(PYTHON REQUIRED python)
-#find_package(PythonLibs 2.7 REQUIRED python)
-  add_definitions(-D_MSYS -DMSYS)
+  #find_package(PythonLibs 2.7 REQUIRED python)
+  # FIXME relative path hack
+  if(NOT WINSDK_INCLUDE_PATH)
+    include("libbarobo/findwindowssdk.cmake")
+  endif(NOT WINSDK_INCLUDE_PATH)
+  if(NOT MSVC_INCLUDE_PATH)
+    include("libbarobo/findmsvc.cmake")
+  endif(NOT MSVC_INCLUDE_PATH)
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -idirafter \"${WINSDK_INCLUDE_PATH}\" -idirafter \"${MSVC_INCLUDE_PATH}\"")
+
+  #add_definitions(-D_MSYS -DMSYS)
+  add_definitions(-D_WIN32_WINNT=0x0502 -DWIN32_LEAN_AND_MEAN)
   message( "gtk cflags: ${GTK2_CFLAGS}" )
   #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GTK2_CFLAGS}")
   #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GTK2_CFLAGS}")
@@ -36,34 +48,37 @@ else(CMAKE_HOST_WIN32)
 #find_package(PythonLibs 2.7 REQUIRED python)
 endif(CMAKE_HOST_WIN32)
 
-if(GTK2_FOUND)
-  include_directories(${GTK2_INCLUDE_DIRS})
-  include_directories(${PYTHON_INCLUDE_DIRS})
+if(NOT GTK2_FOUND)
+  message(FATAL_ERROR "Gtk not found!")
+endif(NOT GTK2_FOUND)
+
+include_directories(${GTK2_INCLUDE_DIRS})
+include_directories(${PYTHON_INCLUDE_DIRS})
 # For Scintilla
-  include_directories(${CMAKE_SOURCE_DIR}/libbarobo)
-  include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
-  include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile/mxml-2.7)
-  include_directories(${LIBSTKCOMMS_SOURCE_DIR})
-  link_directories(${LIBSTKCOMMS_BINARY_DIR})
-  link_directories(${GTK2_LIBRARY_DIRS})
-  link_directories(${PYTHON_LIBRARY_DIRS})
-  link_directories(${CMAKE_SOURCE_DIR}/libbarobo)
-  link_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
+include_directories(${CMAKE_SOURCE_DIR}/libbarobo)
+include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
+include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile/mxml-2.7)
+include_directories(${LIBSTKCOMMS_SOURCE_DIR})
+link_directories(${LIBSTKCOMMS_BINARY_DIR})
+link_directories(${GTK2_LIBRARY_DIRS})
+link_directories(${PYTHON_LIBRARY_DIRS})
+link_directories(${CMAKE_SOURCE_DIR}/libbarobo)
+link_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
 
-  add_executable(BaroboLink
-      commsHandler.cpp
-      configFile.cpp
-      connectDialog.cpp
-      connectDongleDialog.cpp
-      controlDialog.cpp
-      RecordMobot.cpp
-      BaroboLink.cpp
-      RobotManager.cpp
-      scanMobotsDialog.cpp
-      teachingDialog.cpp
-      updateFirmware.cpp )
+add_executable(BaroboLink
+commsHandler.cpp
+configFile.cpp
+connectDialog.cpp
+connectDongleDialog.cpp
+controlDialog.cpp
+RecordMobot.cpp
+BaroboLink.cpp
+RobotManager.cpp
+scanMobotsDialog.cpp
+teachingDialog.cpp
+updateFirmware.cpp )
 
-  add_executable(BaroboFirmwareUpdate BaroboFirmwareUpdate.cpp)
+add_executable(BaroboFirmwareUpdate BaroboFirmwareUpdate.cpp)
 
 if(CMAKE_HOST_WIN32)
   target_link_libraries(
@@ -123,9 +138,6 @@ else()
       DESTINATION share/applications
       )
 endif()
-else(GTK2_FOUND)
-  message(FATAL_ERROR "Gtk not found!")
-endif(GTK2_FOUND)
 
 if(CMAKE_SYSTEM_NAME MATCHES [Ll]inux)
   string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)

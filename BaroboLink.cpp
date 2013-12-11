@@ -17,12 +17,8 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef _MSYS
-/* hlh: This is here to support USB hotplug detection. */
-#define WINVER 0x0501   // Tell Windows headers we're targeting WinXP
-#endif
-
 #include "split.hpp"
+#include "arraylen.h"
 
 #include <gtk/gtk.h>
 #include <cstring>
@@ -43,9 +39,10 @@
 #include <sys/stat.h>
 #include "thread_macros.h"
 
-#ifdef _MSYS
+#ifdef _WIN32
 #include "libbarobo/win32_error.h"
 #include <windows.h>
+#include <shellapi.h>
 #include <dbt.h>
 #include <initguid.h>   // must be included before ddk/*, otherwise link error
                         // (because that makes complete sense)
@@ -61,9 +58,7 @@ GtkWidget *g_scieditor_ext;
 
 CRobotManager *g_robotManager;
 
-std::vector<std::string> g_interfaceFiles;
-
-const char *g_interfaceFilesInit[] = {
+const char *g_interfaceFiles[] = {
   "interface/interface.glade",
   "interface.glade",
   "../share/BaroboLink/interface.glade"
@@ -238,23 +233,22 @@ int main(int argc, char* argv[])
   }
 #endif
 
+  std::vector<std::string> interfaceFiles
+    (g_interfaceFiles, g_interfaceFiles + ARRAYLEN(g_interfaceFiles));
+
   /* hlh: This used to be ifdef __MACH__, but XDG is not a BSD-specific platform. */
 #ifndef _WIN32
-  for (int i = 0; i < sizeof(g_interfaceFilesInit) / sizeof(g_interfaceFilesInit[0]); ++i) {
-    g_interfaceFiles.push_back(std::string(g_interfaceFilesInit[i]));
-  }
-
   std::string datadir (getenv("XDG_DATA_DIRS"));
 
   if(!datadir.empty()) {
     std::vector<std::string> xdg_data_dirs = split_escaped(datadir, ':', '\\');
     for (std::vector<std::string>::iterator it = xdg_data_dirs.begin();
         xdg_data_dirs.end() != it; ++it) {
-      g_interfaceFiles.push_back(*it + std::string("/BaroboLink/interface.glade"));
+      interfaceFiles.push_back(*it + std::string("/BaroboLink/interface.glade"));
     }
   }
   else {
-    g_interfaceFiles.push_back(std::string("/usr/share/BaroboLink/interface.glade"));
+    interfaceFiles.push_back(std::string("/usr/share/BaroboLink/interface.glade"));
   }
 #endif
 
@@ -263,8 +257,8 @@ int main(int argc, char* argv[])
   struct stat s;
   int err;
   bool iface_file_found = false;
-  for (std::vector<std::string>::iterator it = g_interfaceFiles.begin();
-      g_interfaceFiles.end() != it; ++it) {
+  for (std::vector<std::string>::iterator it = interfaceFiles.begin();
+      interfaceFiles.end() != it; ++it) {
     printf("checking %s\n", it->c_str());
     err = stat(it->c_str(), &s);
     if(err == 0) {
@@ -350,6 +344,7 @@ void initialize()
     RecordMobot_init(g_mobotParent, "DONGLE");
     rc = Mobot_connectWithTTY((mobot_t*)g_mobotParent, dongle);
     if(rc == 0) {
+      printf("(barobo) INFO: Dongle connected on %s\n", dongle);
       Mobot_setDongleMobot((mobot_t*)g_mobotParent);
       gtk_label_set_text(l, dongle);
       break;
@@ -377,7 +372,7 @@ int getIterModelFromTreeSelection(GtkTreeView *treeView, GtkTreeModel **model, G
 
 void on_menuitem_help_activate(GtkWidget *widget, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   /* Get the install path of BaroboLink from the registry */
   DWORD size;
   char path[1024];
@@ -414,7 +409,7 @@ void on_menuitem_help_activate(GtkWidget *widget, gpointer data)
 
 void on_menuitem_demos_activate(GtkWidget *widget, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
   memset(&si, 0, sizeof(STARTUPINFO));
@@ -460,7 +455,7 @@ void on_imagemenuitem_about_activate(GtkWidget *widget, gpointer data)
 void on_menuitem_installLinkbotDriver_activate(GtkWidget *widget, gpointer data)
 {
   /* Get the install path of BaroboLink from the registry */
-#ifdef _MSYS
+#ifdef _WIN32
   DWORD size;
   char path[1024];
   HKEY key;
@@ -507,7 +502,7 @@ void on_menuitem_installLinkbotDriver_activate(GtkWidget *widget, gpointer data)
 
 void on_aboutdialog_activate_link(GtkAboutDialog *label, gchar* uri, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   ShellExecuteA(
       NULL,
       "open",

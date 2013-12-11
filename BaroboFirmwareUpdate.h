@@ -20,7 +20,7 @@
 #ifndef _MOBOT_FIRMWARE_UPDATE_H_
 #define _MOBOT_FIRMWARE_UPDATE_H_
 
-#ifdef _MSYS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 

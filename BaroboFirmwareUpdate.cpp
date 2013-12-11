@@ -17,6 +17,9 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "split.hpp"
+#include "arraylen.h"
+
 #include <stdlib.h>
 #include <ctype.h>
 #include <gtk/gtk.h>
@@ -34,6 +37,8 @@
 #include "BaroboFirmwareUpdate.h"
 #include "thread_macros.h"
 
+#include <string>
+
 #define MAX_THREADS 40
 
 #ifdef __MACH__
@@ -50,28 +55,27 @@ typedef enum dongleSearchStatus_e
 
 GtkBuilder *g_builder;
 GtkWidget *g_window;
-dongleSearchStatus_t g_dongleSearchStatus;
+dongleSearchStatus_t g_dongleSearchStatus = DONGLE_NIL;
 MUTEX_T g_giant_lock;
 COND_T g_giant_cond;
 THREAD_T g_mainSearchThread;
 
-mobot_t* g_mobot = NULL;
+mobot_t g_mobot;
 
 int g_numThreads = 0;
 
 char g_comport[80];
 CStkComms *g_stkComms;
 
-char *g_interfaceFiles[512] = {
+const char *g_interfaceFiles[] = {
   "interface/mobotfirmwareupdateinterface.glade",
   "mobotfirmwareupdateinterface.glade ",
-  "../share/BaroboLink/mobotfirmwareupdateinterface.glade",
-  NULL,
-  NULL
+  "../share/BaroboLink/mobotfirmwareupdateinterface.glade"
 };
 
 const char* g_hexfilename;
 
+#if 0
 void* findDongleWorkerThread(void* arg)
 {
   /* The argument is a pointer to an int */
@@ -116,54 +120,20 @@ void* findDongleWorkerThread(void* arg)
   MUTEX_UNLOCK(&g_giant_lock);
   return NULL;
 }
+#endif
 
-#define MAX_COMPORT 256
 void* findDongleThread(void* arg)
 {
-  static int args[MAX_COMPORT];
-  int i;
-  THREAD_T threads[MAX_COMPORT];
-  for(i = 0; i < MAX_COMPORT; i++) {
-    args[i] = i;
-  }
   g_dongleSearchStatus = DONGLE_SEARCHING;
-  /* Spawn worker threads to find the dongle on a com port */
-  for(i = 0; i < MAX_COMPORT; i++) { 
-    /* First, make sure there are less than MAX_THREADS running */
-    MUTEX_LOCK(&g_giant_lock);
-    while(
-        (g_numThreads >= MAX_THREADS) &&
-        (g_dongleSearchStatus == DONGLE_SEARCHING)
-        ) 
-    {
-      COND_WAIT(&g_giant_cond, &g_giant_lock);
-    }
-    if(g_dongleSearchStatus != DONGLE_SEARCHING) {
-      i++;
-      MUTEX_UNLOCK(&g_giant_lock);
-      break;
-    }
-    /* Spawn a thread */
-    THREAD_CREATE(&threads[i], findDongleWorkerThread, &args[i]);
-    g_numThreads++;
-    MUTEX_UNLOCK(&g_giant_lock);
-  }
-  /* Join all threads */
-  int j;
-  for(j = 0; j < i; j++) {
-    MUTEX_LOCK(&g_giant_lock);
-    if(g_dongleSearchStatus != DONGLE_SEARCHING) {
-      MUTEX_UNLOCK(&g_giant_lock);
-      break;
-    }
-    MUTEX_UNLOCK(&g_giant_lock);
-    THREAD_JOIN(threads[j]);
-  }
-  MUTEX_LOCK(&g_giant_lock);
-  if(g_dongleSearchStatus == DONGLE_SEARCHING) {
+
+  if (-1 == Mobot_dongleGetTTY(g_comport, ARRAYLEN(g_comport)) ||
+      -1 == Mobot_connectWithTTY(&g_mobot, g_comport)) {
     g_dongleSearchStatus = DONGLE_NOTFOUND;
   }
-  MUTEX_UNLOCK(&g_giant_lock);
+  else {
+    g_dongleSearchStatus = DONGLE_FOUND;
+  }
+
   return NULL;
 }
 
@@ -179,7 +149,7 @@ gboolean findDongleTimeout(gpointer data)
     rc = TRUE;
   } else if (g_dongleSearchStatus == DONGLE_FOUND) {
     /* Set up the labels and stuff */
-    switch(g_mobot->formFactor) {
+    switch(g_mobot.formFactor) {
       case MOBOTFORM_I:
         sprintf(buf, "Linkbot-I");
         break;
@@ -193,7 +163,7 @@ gboolean findDongleTimeout(gpointer data)
     gtk_label_set_text(
         GTK_LABEL(gtk_builder_get_object(g_builder, "label_formFactor")),
         buf);
-    sprintf(buf, "%d", Mobot_getVersion(g_mobot));
+    sprintf(buf, "%d", Mobot_getVersion(&g_mobot));
     gtk_label_set_text(
         GTK_LABEL(gtk_builder_get_object(g_builder, "label_firmwareVersion")),
         buf);
@@ -203,7 +173,7 @@ gboolean findDongleTimeout(gpointer data)
         buf);
     gtk_entry_set_text(
         GTK_ENTRY(gtk_builder_get_object(g_builder, "entry_serialID")),
-        g_mobot->serialID);
+        g_mobot.serialID);
     /* Go to next notebook page */
     gtk_notebook_next_page(
         GTK_NOTEBOOK(gtk_builder_get_object(g_builder, "notebook1")));
@@ -262,11 +232,23 @@ int main(int argc, char* argv[])
     exit(0);
   }
 #endif
-#ifdef __MACH__
-  char *datadir = getenv("XDG_DATA_DIRS");
-  if(datadir != NULL) {
-    g_interfaceFiles[3] = (char*)malloc(sizeof(char)*512);
-    sprintf(g_interfaceFiles[3], "%s/BaroboLink/interface.glade", datadir);
+
+  std::vector<std::string> interfaceFiles
+    (g_interfaceFiles, g_interfaceFiles + ARRAYLEN(g_interfaceFiles));
+
+  /* hlh: This used to be ifdef __MACH__, but XDG is not a BSD-specific platform. */
+#ifndef _WIN32
+  std::string datadir (getenv("XDG_DATA_DIRS"));
+
+  if(!datadir.empty()) {
+    std::vector<std::string> xdg_data_dirs = split_escaped(datadir, ':', '\\');
+    for (std::vector<std::string>::iterator it = xdg_data_dirs.begin();
+        xdg_data_dirs.end() != it; ++it) {
+      interfaceFiles.push_back(*it + std::string("/BaroboLink/interface.glade"));
+    }
+  }
+  else {
+    interfaceFiles.push_back(std::string("/usr/share/BaroboLink/interface.glade"));
   }
 #endif
 
@@ -274,26 +256,30 @@ int main(int argc, char* argv[])
   /* Find ther interface file */
   struct stat s;
   int err;
-  int i;
-  for(i = 0; g_interfaceFiles[i] != NULL; i++) {
-    err = stat(g_interfaceFiles[i], &s);
+  bool iface_file_found = false;
+  for (std::vector<std::string>::iterator it = interfaceFiles.begin();
+      interfaceFiles.end() != it; ++it) {
+    err = stat(it->c_str(), &s);
     if(err == 0) {
-      if( ! gtk_builder_add_from_file(g_builder, g_interfaceFiles[i], &error) )
+      if( ! gtk_builder_add_from_file(g_builder, it->c_str(), &error) )
       {
         g_warning("%s", error->message);
         //g_free(error);
         return -1;
       } else {
+        iface_file_found = true;
         break;
       }
     }
   }
 
-  if(g_interfaceFiles[i] == NULL) {
+  if (!iface_file_found) {
     /* Could not find the interface file */
     g_warning("Could not find interface file.");
     return -1;
   }
+
+  Mobot_init(&g_mobot);
 
   /* Get the main window */
   g_window = GTK_WIDGET( gtk_builder_get_object(g_builder, "window1"));
@@ -319,7 +305,11 @@ void on_button_p1_next_clicked(GtkWidget* widget, gpointer data)
   gtk_widget_set_sensitive(widget, false);
 
   /* Make sure thread is joined */
-  THREAD_JOIN(g_mainSearchThread);
+  /* hlh: pthread_join(NULL, ...) is undefined behavior, we need some way of
+   * making sure that the thread is actually running... */
+  if (DONGLE_NIL != g_dongleSearchStatus) {
+    THREAD_JOIN(g_mainSearchThread);
+  }
 
   /* Reset state vars */
   g_dongleSearchStatus = DONGLE_SEARCHING;
@@ -389,8 +379,8 @@ void on_button_p2_yes_clicked(GtkWidget* widget, gpointer data)
     for(i = 0; i < 5; i++) {
       buf[i] = toupper(text[i]);
     }
-    if(strcmp(g_mobot->serialID, buf)) {
-      Mobot_setID(g_mobot, buf);
+    if(strcmp(g_mobot.serialID, buf)) {
+      Mobot_setID(&g_mobot, buf);
     }
   } else {
     /* Pop up warning dialog */
@@ -452,10 +442,10 @@ void on_button_p2_yes_clicked(GtkWidget* widget, gpointer data)
   }
 
   /* Next, reboot the module and go on to the next page */
-  Mobot_reboot(g_mobot);
-  Mobot_disconnect(g_mobot);
-  free(g_mobot);
-  g_mobot = NULL;
+  Mobot_reboot(&g_mobot);
+  Mobot_disconnect(&g_mobot);
+  //free(g_mobot);
+  //g_mobot = NULL;
   g_timeout_add(3000, switch_to_p3_timeout, NULL);
 }
 

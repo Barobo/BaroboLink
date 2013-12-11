@@ -29,9 +29,16 @@
 #include <mach-o/dyld.h>
 #endif
 
-#ifdef _MSYS
-#define sleep(x) _sleep(x)
+#ifdef _WIN32
+#include <windows.h>
+/* This is hacky, just trying to get the compiler to shut up about _sleep
+ * being deprecated. The need for this should go away if we switch to C++11/C11
+ * threads. */
+void sleep_seconds (unsigned int s) { Sleep(s * 1000); }
+#else
+void sleep_seconds (unsigned int s) { sleep(s); }
 #endif
+
 
 /* The button state: For Buttons (B_), a value of 1 indicates that the button
  * has been pressed. For the sliders, 1 indicates that the slider is currently
@@ -566,7 +573,7 @@ void* controllerHandlerThread(void* arg)
     MUTEX_LOCK(&g_activeMobotLock);
     if(g_activeMobot == NULL) {
       MUTEX_UNLOCK(&g_activeMobotLock);
-      sleep(1);
+      sleep_seconds(1);
       continue;
     }
     MUTEX_UNLOCK(&g_activeMobotLock);

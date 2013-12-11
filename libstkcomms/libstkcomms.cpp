@@ -31,6 +31,7 @@
 #include <winsock2.h>
 #ifdef ENABLE_BLUETOOTH
 #pragma comment(lib, "ws2_32.lib")
+#include <basetyps.h>
 #include <Ws2bth.h>
 #endif
 #endif

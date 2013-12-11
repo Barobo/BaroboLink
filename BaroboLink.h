@@ -23,7 +23,7 @@
 #include <gtk/gtk.h>
 #include "RobotManager.h"
 
-#ifdef _MSYS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -55,7 +55,7 @@ extern GtkWidget *g_scieditor;
 extern GtkWidget *g_scieditor_ext;
 extern recordMobot_t* g_activeMobot;
 extern recordMobot_t *g_mobotParent;
-#ifdef _MSYS
+#ifdef _WIN32
 extern HANDLE g_activeMobotLock;
 #else
 extern pthread_mutex_t g_activeMobotLock;
