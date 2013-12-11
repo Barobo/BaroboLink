@@ -96,7 +96,7 @@ Section -MainProgram
 ${INSTALL_TYPE}
 SetOverwrite ifnewer
 SetOutPath "$INSTDIR"
-File "BaroboLink.exe"
+File "build/BaroboLink.exe"
 File "freetype6.dll"
 File "intl.dll"
 File "libatk-1.0-0.dll"
@@ -118,7 +118,7 @@ File "libpangoft2-1.0-0.dll"
 File "libpangowin32-1.0-0.dll"
 File "libpng14-14.dll"
 File "libstdc++-6.dll"
-File "BaroboFirmwareUpdate.exe"
+File "build/BaroboFirmwareUpdate.exe"
 File "pthreadGC2.dll"
 File "zlib1.dll"
 SetOutPath "$INSTDIR\Drivers"
