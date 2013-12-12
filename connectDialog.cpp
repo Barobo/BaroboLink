@@ -602,7 +602,7 @@ void refreshConnectDialog()
           i*3, (i*3)+2,
           GTK_FILL, GTK_FILL,
           2, 2);
-      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_updateFirmware_clicked), GINT_TO_POINTER(i));
+      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_robotInfo_clicked), GINT_TO_POINTER(i));
     }
     /* Add a horizontal separator */
     w = gtk_hseparator_new();
