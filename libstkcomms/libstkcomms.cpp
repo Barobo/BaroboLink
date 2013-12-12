@@ -902,11 +902,12 @@ int stkComms_recvBytes(stkComms_t* comms, uint8_t* buf, size_t expectedBytes, si
           NULL,
           &comms->ov);
       DWORD bytes;
-      GetOverlappedResult( comms->commHandle,
+      rc = GetOverlappedResult( comms->commHandle,
           &comms->ov,
           &bytes,
           TRUE);
-      rc = bytes;
+      if(rc) rc = bytes;
+      else rc = -1;
     }
 #endif
     if(rc > 0) {

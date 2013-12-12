@@ -41,7 +41,9 @@
 
 #define MAX_THREADS 40
 
+#ifdef __MACH__
 #undef strdup
+#endif
 
 typedef enum dongleSearchStatus_e
 {
