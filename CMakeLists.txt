@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(BaroboLink)
 
 add_subdirectory(libstkcomms)
-add_subdirectory(libbarobo)
+#add_subdirectory(libbarobo)
 exec_program(cat ARGS "\"${CMAKE_SOURCE_DIR}/VERSION.TXT\"" OUTPUT_VARIABLE barobolink_version)
 add_definitions(-DBAROBOLINK_VERSION=${barobolink_version})
 message("Configuring BaroboLink version " ${barobolink_version})
@@ -30,6 +30,7 @@ if(CMAKE_HOST_WIN32)
   #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GTK2_CFLAGS}")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mms-bitfields")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mms-bitfields")
+  # hlh: should this append to CMAKE_C_FLAGS_RELEASE instead?
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -mms-bitfields -mwindows")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -mms-bitfields -mwindows")
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g -mms-bitfields")
@@ -55,55 +56,59 @@ endif(NOT GTK2_FOUND)
 include_directories(${GTK2_INCLUDE_DIRS})
 include_directories(${PYTHON_INCLUDE_DIRS})
 # For Scintilla
-include_directories(${CMAKE_SOURCE_DIR}/libbarobo)
-include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
-include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile/mxml-2.7)
+#include_directories(${CMAKE_SOURCE_DIR}/libbarobo)
+#include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
+#include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile/mxml-2.7)
 include_directories(${LIBSTKCOMMS_SOURCE_DIR})
+include_directories(${CMAKE_INSTALL_PREFIX}/include)
 link_directories(${LIBSTKCOMMS_BINARY_DIR})
 link_directories(${GTK2_LIBRARY_DIRS})
 link_directories(${PYTHON_LIBRARY_DIRS})
-link_directories(${CMAKE_SOURCE_DIR}/libbarobo)
-link_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
+#link_directories(${CMAKE_SOURCE_DIR}/libbarobo)
+#link_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
+link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 
-add_executable(BaroboLink
-commsHandler.cpp
-configFile.cpp
-connectDialog.cpp
-connectDongleDialog.cpp
-controlDialog.cpp
-RecordMobot.cpp
-BaroboLink.cpp
-RobotManager.cpp
-scanMobotsDialog.cpp
-teachingDialog.cpp
-updateFirmware.cpp )
+set(BAROBOLINK_SRCS
+    commsHandler.cpp
+    configFile.cpp
+    connectDialog.cpp
+    connectDongleDialog.cpp
+    controlDialog.cpp
+    RecordMobot.cpp
+    BaroboLink.cpp
+    RobotManager.cpp
+    scanMobotsDialog.cpp
+    teachingDialog.cpp
+    updateFirmware.cpp)
 
-add_executable(BaroboFirmwareUpdate BaroboFirmwareUpdate.cpp)
+set(BAROBOFIRMWAREUPDATE_SRCS BaroboFirmwareUpdate.cpp)
+
+add_executable(BaroboLink ${BAROBOLINK_SRCS})
+add_executable(BaroboFirmwareUpdate ${BAROBOFIRMWAREUPDATE_SRCS})
 
 if(CMAKE_HOST_WIN32)
-  target_link_libraries(
-      BaroboLink
-      stkcomms 
-      baroboStatic
+  target_link_libraries(BaroboLink barobo stkcomms pthread
       ${CMAKE_SOURCE_DIR}/BaroboLink.res
-      ${GTK2_LIBRARIES} 
       ${PYTHON_LIBRARIES}
-      pthread)
-  target_link_libraries(
-      BaroboFirmwareUpdate
-      stkcomms 
-      baroboStatic
-      ${GTK2_LIBRARIES} )
+      ${GTK2_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate barobo stkcomms 
+      ${GTK2_LIBRARIES})
 elseif(APPLE)
   find_library(COREFOUNDATION_LIB CoreFoundation)
   find_library(IOKIT_LIB IOKit)
-  target_link_libraries(BaroboLink baroboStatic stkcomms pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES} ${PYTHON_LIBRARIES} )
-  target_link_libraries(BaroboFirmwareUpdate baroboStatic stkcomms pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES} )
+  target_link_libraries(BaroboLink barobo stkcomms pthread
+      ${IOKIT_LIB} ${COREFOUNDATION_LIB}
+      ${PYTHON_LIBRARIES}
+      ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate barobo stkcomms pthread
+      ${IOKIT_LIB} ${COREFOUNDATION_LIB}
+      ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
 else()
-  target_link_libraries(BaroboLink baroboStatic stkcomms pthread bluetooth ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES} )
-  target_link_libraries(BaroboFirmwareUpdate baroboStatic stkcomms pthread ${GTK2_LIBRARIES} )
+  target_link_libraries(BaroboLink barobo stkcomms bluetooth pthread 
+      ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate barobo stkcomms bluetooth pthread ${GTK2_LIBRARIES})
   install(TARGETS BaroboLink BaroboFirmwareUpdate
-          RUNTIME DESTINATION bin )
+          RUNTIME DESTINATION bin)
   install(FILES 
       interface/16px_move_back.png
       interface/16px_move_back.svg
@@ -119,7 +124,7 @@ else()
       interface/inch_left.svg
       interface/inch_right.svg
       interface/interface.glade
-      interface/interfacepatch.patch
+      #interface/interfacepatch.patch
       interface/lface_forward.svg
       interface/mobotfirmwareupdateinterface.glade
       interface/move_back.png
