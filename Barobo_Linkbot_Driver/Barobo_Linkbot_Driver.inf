@@ -65,4 +65,4 @@ HKR,,EnumPropPages32,,"msports.dll,SerialPortPropPageProvider"
 ;------------------------------------------------------------------------------
 [Strings]
 MFGNAME="Barobo, Inc."
-DESCRIPTION="Barobo Mobot"
+DESCRIPTION="Barobo Linkbot"

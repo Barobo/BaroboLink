@@ -219,7 +219,7 @@ gboolean connectDialogPulse(gpointer data)
 
 void on_button_Connect_clicked(GtkWidget* w, gpointer data)
 {
-  int index = (long)data;
+  int index = GPOINTER_TO_INT(data);
   struct connectThreadArg_s* arg;
   /* First, check to see if the requested mobot is a DOF. If it is, we must
    * ensure that the dongle has been connected. */
@@ -254,7 +254,7 @@ void on_button_Connect_clicked(GtkWidget* w, gpointer data)
 
 void on_button_Disconnect_clicked(GtkWidget* w, gpointer data)
 {
-  int index = (long) data;
+  int index = GPOINTER_TO_INT(data);
   /* We have to lock the controlDialog locks first to make sure we don't screw
    * up their data. */
   MUTEX_LOCK(&g_activeMobotLock);
@@ -266,7 +266,7 @@ void on_button_Disconnect_clicked(GtkWidget* w, gpointer data)
 
 void on_button_Remove_clicked(GtkWidget* w, gpointer data)
 {
-  int index = (long) data;
+  int index = GPOINTER_TO_INT(data);
   /* First, make sure the robot is disconnected */
   g_robotManager->disconnect(index);
   g_robotManager->remove(index);
@@ -276,7 +276,7 @@ void on_button_Remove_clicked(GtkWidget* w, gpointer data)
 
 void on_button_MoveUp_clicked(GtkWidget* w, gpointer data)
 {
-  int index = (long)data;
+  int index = GPOINTER_TO_INT(data);
   g_robotManager->moveEntryUp(index);
   g_robotManager->write();
   refreshConnectDialog();
@@ -284,7 +284,7 @@ void on_button_MoveUp_clicked(GtkWidget* w, gpointer data)
 
 void on_button_MoveDown_clicked(GtkWidget* w, gpointer data)
 {
-  int index = (long)data;
+  int index = GPOINTER_TO_INT(data);
   g_robotManager->moveEntryDown(index);
   g_robotManager->write();
   refreshConnectDialog();
@@ -364,7 +364,7 @@ void refreshConnectDialog()
       FALSE);
   /* For each Mobot entry, we need to compose a set of child widgets and attach
    * them to the right places on the grid */
-  int i;
+  int32_t i;    // i is passed to signal handlers, so may be at most 32 bits
   GtkWidget *w;
   for(i = 0; i < g_robotManager->numEntries(); i++) {
     /* Make a new label for the entry */
@@ -390,7 +390,7 @@ void refreshConnectDialog()
               GTK_FILL, GTK_FILL,
               2, 2);
           /* Attach the connect/disconnect button signal handler */
-          g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_Connect_clicked), (void*)i);
+          g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_Connect_clicked), GINT_TO_POINTER(i));
           /* Add an image denoting connection status for each one */
           w = gtk_image_new_from_stock(GTK_STOCK_NO, GTK_ICON_SIZE_BUTTON);
           gtk_widget_show(w);
@@ -431,7 +431,7 @@ void refreshConnectDialog()
               GTK_FILL, GTK_FILL,
               2, 2);
           /* Attach the connect/disconnect button signal handler */
-          g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_Disconnect_clicked), (void*)i);
+          g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_Disconnect_clicked), GINT_TO_POINTER(i));
           /* Add an image denoting connection status for each one */
           w = gtk_image_new_from_stock(GTK_STOCK_YES, GTK_ICON_SIZE_BUTTON);
           gtk_widget_show(w);
@@ -463,7 +463,7 @@ void refreshConnectDialog()
           GTK_FILL, GTK_FILL,
           2, 2);
       /* Attach the connect/disconnect button signal handler */
-      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_Connect_clicked), (void*)i);
+      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_Connect_clicked), GINT_TO_POINTER(i));
       /* Add an image denoting connection status for each one */
       w = gtk_image_new_from_stock(GTK_STOCK_NO, GTK_ICON_SIZE_BUTTON);
       gtk_widget_show(w);
@@ -483,7 +483,7 @@ void refreshConnectDialog()
         i*3, (i*3)+2,
         GTK_FILL, GTK_FILL,
         2, 2);
-    g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_Remove_clicked), (void*)i);
+    g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_Remove_clicked), GINT_TO_POINTER(i));
     /* Add move-up button */
     w = gtk_button_new_from_stock(GTK_STOCK_GO_UP);
     gtk_widget_show(w);
@@ -493,7 +493,7 @@ void refreshConnectDialog()
         i*3, (i*3)+1,
         GTK_FILL, GTK_FILL,
         2, 2);
-    g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_MoveUp_clicked), (void*)i);
+    g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_MoveUp_clicked), GINT_TO_POINTER(i));
     /* Add move-down button */
     w = gtk_button_new_from_stock(GTK_STOCK_GO_DOWN);
     gtk_widget_show(w);
@@ -503,7 +503,7 @@ void refreshConnectDialog()
         (i*3)+1, (i*3)+2,
         GTK_FILL, GTK_FILL,
         2, 2);
-    g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_MoveDown_clicked), (void*)i);
+    g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_MoveDown_clicked), GINT_TO_POINTER(i));
     /* Maybe add a color and beep buttons */
     int form;
     if( 
@@ -589,19 +589,12 @@ void refreshConnectDialog()
         }
       }
     }
-    /* Maybe add an "Upgrade Firmware" button */
+    /* Add an "Info" button */
     if( (g_robotManager->getMobotIndex(i) != NULL) &&
-        (g_robotManager->getMobotIndex(i)->connectStatus == RMOBOT_CONNECTED) &&
-        (g_robotManager->getMobotIndex(i)->firmwareVersion < Mobot_protocolVersion()) ) 
+        (g_robotManager->getMobotIndex(i)->connectStatus == RMOBOT_CONNECTED)
+      )
     {
-      int form=0;
-      Mobot_getFormFactor((mobot_t*)g_robotManager->getMobotIndex(i), &form);
-      GdkColor color;
-      gdk_color_parse("yellow", &color);
-      w = gtk_button_new_with_label("Upgrade\nFirmware");
-      gtk_widget_modify_bg(w, GTK_STATE_NORMAL, &color);
-      gdk_color_parse("#FFFF22", &color);
-      gtk_widget_modify_bg(w, GTK_STATE_PRELIGHT, &color);
+      w = gtk_button_new_with_label("Info");
       gtk_widget_show(w);
       gtk_table_attach( GTK_TABLE(rootTable),
           w,
@@ -609,7 +602,7 @@ void refreshConnectDialog()
           i*3, (i*3)+2,
           GTK_FILL, GTK_FILL,
           2, 2);
-      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_updateFirmware_clicked), (void*)i);
+      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_robotInfo_clicked), GINT_TO_POINTER(i));
     }
     /* Add a horizontal separator */
     w = gtk_hseparator_new();

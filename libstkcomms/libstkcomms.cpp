@@ -31,6 +31,7 @@
 #include <winsock2.h>
 #ifdef ENABLE_BLUETOOTH
 #pragma comment(lib, "ws2_32.lib")
+#include <basetyps.h>
 #include <Ws2bth.h>
 #endif
 #endif
@@ -901,11 +902,12 @@ int stkComms_recvBytes(stkComms_t* comms, uint8_t* buf, size_t expectedBytes, si
           NULL,
           &comms->ov);
       DWORD bytes;
-      GetOverlappedResult( comms->commHandle,
+      rc = GetOverlappedResult( comms->commHandle,
           &comms->ov,
           &bytes,
           TRUE);
-      rc = bytes;
+      if(rc) rc = bytes;
+      else rc = -1;
     }
 #endif
     if(rc > 0) {

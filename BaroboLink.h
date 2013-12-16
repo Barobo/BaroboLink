@@ -23,15 +23,19 @@
 #include <gtk/gtk.h>
 #include "RobotManager.h"
 
-#ifdef _MSYS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
 #define PLAT_GTK 1
 #define GTK
 #include <math.h>
+#ifndef RAD2DEG
 #define RAD2DEG(x) ((x)*180.0/M_PI)
+#endif
+#ifndef DEG2RAD
 #define DEG2RAD(x) ((x)*M_PI/180.0)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,8 +55,7 @@ extern GtkWidget *g_scieditor;
 extern GtkWidget *g_scieditor_ext;
 extern recordMobot_t* g_activeMobot;
 extern recordMobot_t *g_mobotParent;
-extern char *g_interfaceDir;
-#ifdef _MSYS
+#ifdef _WIN32
 extern HANDLE g_activeMobotLock;
 #else
 extern pthread_mutex_t g_activeMobotLock;
@@ -85,6 +88,7 @@ G_MODULE_EXPORT void on_button_scanMobots_clicked(GtkWidget* widget, gpointer da
 G_MODULE_EXPORT void on_colorDialog_color_set(GtkColorButton* w, gpointer data);
 G_MODULE_EXPORT void on_beep_button_pressed(GtkWidget *w, gpointer data);
 G_MODULE_EXPORT void on_beep_button_released(GtkWidget *w, gpointer data);
+G_MODULE_EXPORT void on_button_robotInfo_OK_clicked(GtkWidget* widget, gpointer data);
 void refreshConnectDialog();
 gboolean connectDialogPulse(gpointer data);
 
@@ -107,6 +111,7 @@ G_MODULE_EXPORT void on_button_scanMobotsRefresh_clicked(GtkWidget *w, gpointer 
 /* Reflashing Process */
 extern char g_reflashAddress[80];
 extern int g_reflashHWRev;
+G_MODULE_EXPORT void on_button_robotInfo_clicked(GtkWidget* widget, gpointer data);
 G_MODULE_EXPORT void on_button_updateFirmware_clicked(GtkWidget* widget, gpointer data);
 G_MODULE_EXPORT void on_button_cancelFlash_clicked(GtkWidget* widget, gpointer data);
 G_MODULE_EXPORT void on_button_reflashContinue_clicked(GtkWidget* widget, gpointer data);

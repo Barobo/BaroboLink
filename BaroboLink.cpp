@@ -17,23 +17,38 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "split.hpp"
+#include "arraylen.h"
+
 #include <gtk/gtk.h>
-#include <string.h>
+#include <cstring>
+#include <cassert>
+
 #define PLAT_GTK 1
 #define GTK
 #include "BaroboLink.h"
 #include "RobotManager.h"
+
 #ifdef __MACH__
 #include <sys/types.h>
 #include <unistd.h>
 #include <gtk-mac-integration.h>
 #define MAX_PATH 4096
 #endif
+
 #include <sys/stat.h>
 #include "thread_macros.h"
-#ifdef _MSYS
-#include <windows.h>
 
+#ifdef _WIN32
+#include "libbarobo/win32_error.h"
+#include <windows.h>
+#include <shellapi.h>
+#include <dbt.h>
+#include <initguid.h>   // must be included before ddk/*, otherwise link error
+                        // (because that makes complete sense)
+#include <ddk/usbiodef.h>
+#include <tchar.h>
+#include <gdk/gdkwin32.h>
 #endif
 
 GtkBuilder *g_builder;
@@ -43,16 +58,150 @@ GtkWidget *g_scieditor_ext;
 
 CRobotManager *g_robotManager;
 
-char *g_interfaceFiles[512] = {
+const char *g_interfaceFiles[] = {
   "interface/interface.glade",
   "interface.glade",
-  "../share/BaroboLink/interface.glade",
-  "/usr/share/BaroboLink/interface.glade",
-  NULL,
-  NULL
+  "../share/BaroboLink/interface.glade"
 };
 
-char *g_interfaceDir;
+#ifdef _WIN32
+WNDPROC g_oldWindowProc;
+
+static int processDeviceArrival (PDEV_BROADCAST_HDR devhdr) {
+  if (DBT_DEVTYP_DEVICEINTERFACE != devhdr->dbch_devicetype) {
+    return 0;
+  }
+
+  PDEV_BROADCAST_DEVICEINTERFACE device
+    = (PDEV_BROADCAST_DEVICEINTERFACE)devhdr;
+
+  _tprintf(_T("%s arrived\n"), device->dbcc_name);
+  return 1;
+}
+
+static int processDeviceRemoveComplete (PDEV_BROADCAST_HDR devhdr) {
+  if (DBT_DEVTYP_DEVICEINTERFACE != devhdr->dbch_devicetype) {
+    return 0;
+  }
+
+  PDEV_BROADCAST_DEVICEINTERFACE device
+    = (PDEV_BROADCAST_DEVICEINTERFACE)devhdr;
+
+  _tprintf(_T("%s removed\n"), device->dbcc_name);
+  return 1;
+}
+
+static LRESULT CALLBACK windowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  int processed = 0;
+
+  if (WM_DEVICECHANGE == uMsg) {
+    switch (wParam) {
+      case DBT_CONFIGCHANGECANCELED:
+        //printf("DBT_CONFIGCHANGECANCELED\n");
+        break;
+      case DBT_CONFIGCHANGED:
+        //printf("DBT_CONFIGCHANGED\n");
+        break;
+      case DBT_DEVICEARRIVAL:
+        //printf("DBT_DEVICEARRIVAL\n");
+        processed = processDeviceArrival((PDEV_BROADCAST_HDR)lParam);
+        break;
+      case DBT_DEVICEQUERYREMOVE:
+        //printf("DBT_DEVICEQUERYREMOVE\n");
+        break;
+      case DBT_DEVICEQUERYREMOVEFAILED:
+        //printf("DBT_DEVICEQUERYREMOVEFAILED\n");
+        break;
+      case DBT_DEVICEREMOVECOMPLETE:
+        //printf("DBT_DEVICEREMOVECOMPLETE\n");
+        processed = processDeviceRemoveComplete((PDEV_BROADCAST_HDR)lParam);
+        break;
+      case DBT_DEVICEREMOVEPENDING:
+        //printf("DBT_DEVICEREMOVEPENDING\n");
+        break;
+      case DBT_DEVICETYPESPECIFIC:
+        //printf("DBT_DEVICETYPESPECIFIC\n");
+        break;
+      case DBT_DEVNODES_CHANGED:
+        //printf("DBT_DEVNODES_CHANGED\n");
+        break;
+      case DBT_QUERYCHANGECONFIG:
+        //printf("DBT_QUERYCHANGECONFIG\n");
+        break;
+      case DBT_USERDEFINED:
+        //printf("DBT_USERDEFINED\n");
+        break;
+      default:
+        //printf("(unknown WM_DEVICECHANGE event)\n");
+        break;
+    }
+  }
+
+  if (!processed) {
+    /* We weren't interested in the message. Pass it along to whomever cares. */
+    return CallWindowProc(g_oldWindowProc, hWnd, uMsg, wParam, lParam);
+  }
+  return TRUE;
+}
+
+static BOOL CALLBACK enumWindowProc (HWND hWnd, LPARAM lParam) {
+  HINSTANCE hInst = (HINSTANCE)GetModuleHandle(NULL);
+
+  if ((HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE) == hInst
+      && IsWindowVisible(hWnd)) {
+    /* lParam is an output parameter window handle */
+    *(HWND *)lParam = hWnd;
+    SetLastError(ERROR_SUCCESS);
+    return FALSE;
+  }
+  return TRUE;
+}
+
+static HDEVNOTIFY registerForDeviceChanges () {
+  /* Getting the top-level window handle should be as simple as:
+   * GdkWindow *gdkwin = gtk_widget_get_root_window(g_window);
+   * HWND hWnd = (HWND)GDK_WINDOW_HWND(gdkwin);
+   * But I couldn't get it working. Found this hacky method on stackoverflow. */
+  HWND hWnd = NULL;
+  if (!EnumWindows(enumWindowProc, (LPARAM)&hWnd)) {
+    DWORD err = GetLastError();
+    if (ERROR_SUCCESS != err) {
+      win32_error(_T("EnumWindows"), err);
+      exit(1);
+    }
+  }
+  assert(hWnd);
+
+  /* Now that we have our top-level window handle, we can replace its WindowProc
+   * with our own to intercept WM_DEVICECHANGE messages. */
+  g_oldWindowProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)windowProc);
+  if (!g_oldWindowProc) {
+    win32_error("SetWindowLongPtr", GetLastError());
+    exit(1);
+  }
+
+  DEV_BROADCAST_DEVICEINTERFACE filter = { 0 };
+  filter.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+  filter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+  //filter.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
+  HDEVNOTIFY hNotify = RegisterDeviceNotification(hWnd, (LPVOID)&filter,
+      DEVICE_NOTIFY_WINDOW_HANDLE | DEVICE_NOTIFY_ALL_INTERFACE_CLASSES);
+  if (!hNotify) {
+    win32_error("RegisterDeviceNotification", GetLastError());
+    exit(1);
+  }
+
+  return hNotify;
+}
+
+static void unregisterForDeviceChanges (HDEVNOTIFY hNotify) {
+  if (!UnregisterDeviceNotification(hNotify)) {
+    win32_error("UnregisterDeviceNotification", GetLastError());
+    exit(1);
+  }
+}
+
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -83,41 +232,49 @@ int main(int argc, char* argv[])
     exit(0);
   }
 #endif
-#ifdef __MACH__
-  char *datadir = getenv("XDG_DATA_DIRS");
-  if(datadir != NULL) {
-    g_interfaceFiles[3] = (char*)malloc(sizeof(char)*512);
-    sprintf(g_interfaceFiles[3], "%s/BaroboLink/interface.glade", datadir);
-    g_interfaceDir = strdup(datadir);
-  } else {
-    g_interfaceDir = strdup("interface");
+
+  std::vector<std::string> interfaceFiles
+    (g_interfaceFiles, g_interfaceFiles + ARRAYLEN(g_interfaceFiles));
+
+  /* hlh: This used to be ifdef __MACH__, but XDG is not a BSD-specific platform. */
+#ifndef _WIN32
+  std::string datadir (getenv("XDG_DATA_DIRS"));
+
+  if(!datadir.empty()) {
+    std::vector<std::string> xdg_data_dirs = split_escaped(datadir, ':', '\\');
+    for (std::vector<std::string>::iterator it = xdg_data_dirs.begin();
+        xdg_data_dirs.end() != it; ++it) {
+      interfaceFiles.push_back(*it + std::string("/BaroboLink/interface.glade"));
+    }
   }
-#elif defined _WIN32
-  g_interfaceDir = strdup("interface");
-#else
-  g_interfaceDir = strdup("/usr/share/BaroboLink");
+  else {
+    interfaceFiles.push_back(std::string("/usr/share/BaroboLink/interface.glade"));
+  }
 #endif
 
   /* Load the UI */
   /* Find ther interface file */
   struct stat s;
   int err;
-  int i;
-  for(i = 0; g_interfaceFiles[i] != NULL; i++) {
-    err = stat(g_interfaceFiles[i], &s);
+  bool iface_file_found = false;
+  for (std::vector<std::string>::iterator it = interfaceFiles.begin();
+      interfaceFiles.end() != it; ++it) {
+    printf("checking %s\n", it->c_str());
+    err = stat(it->c_str(), &s);
     if(err == 0) {
-      if( ! gtk_builder_add_from_file(g_builder, g_interfaceFiles[i], &error) )
+      if( ! gtk_builder_add_from_file(g_builder, it->c_str(), &error) )
       {
         g_warning("%s", error->message);
         //g_free(error);
         return -1;
       } else {
+        iface_file_found = true;
         break;
       }
     }
   }
 
-  if(g_interfaceFiles[i] == NULL) {
+  if (!iface_file_found) {
     /* Could not find the interface file */
     g_warning("Could not find interface file.");
     return -1;
@@ -143,7 +300,17 @@ int main(int argc, char* argv[])
 
   /* Show the window */
   gtk_widget_show(g_window);
+
+#ifdef _WIN32
+  HDEVNOTIFY hNotify = registerForDeviceChanges();
+#endif
+
   gtk_main();
+
+#ifdef _WIN32
+  unregisterForDeviceChanges(hNotify);
+#endif
+
   return 0;
 }
 
@@ -177,6 +344,7 @@ void initialize()
     RecordMobot_init(g_mobotParent, "DONGLE");
     rc = Mobot_connectWithTTY((mobot_t*)g_mobotParent, dongle);
     if(rc == 0) {
+      printf("(barobo) INFO: Dongle connected on %s\n", dongle);
       Mobot_setDongleMobot((mobot_t*)g_mobotParent);
       gtk_label_set_text(l, dongle);
       break;
@@ -204,7 +372,7 @@ int getIterModelFromTreeSelection(GtkTreeView *treeView, GtkTreeModel **model, G
 
 void on_menuitem_help_activate(GtkWidget *widget, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   /* Get the install path of BaroboLink from the registry */
   DWORD size;
   char path[1024];
@@ -241,14 +409,16 @@ void on_menuitem_help_activate(GtkWidget *widget, gpointer data)
 
 void on_menuitem_demos_activate(GtkWidget *widget, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
   memset(&si, 0, sizeof(STARTUPINFO));
   memset(&pi, 0, sizeof(PROCESS_INFORMATION));
+  char cmdline[256];
+  strncpy(cmdline, "-d C:\\ch\\package\\chmobot\\demos", sizeof(cmdline));
   CreateProcess(
 	"C:\\ch\\bin\\chide.exe",
-	"-d C:\\ch\\package\\chmobot\\demos",
+  cmdline,
 	NULL,
 	NULL,
 	FALSE,
@@ -285,7 +455,7 @@ void on_imagemenuitem_about_activate(GtkWidget *widget, gpointer data)
 void on_menuitem_installLinkbotDriver_activate(GtkWidget *widget, gpointer data)
 {
   /* Get the install path of BaroboLink from the registry */
-#ifdef _MSYS
+#ifdef _WIN32
   DWORD size;
   char path[1024];
   HKEY key;
@@ -332,7 +502,7 @@ void on_menuitem_installLinkbotDriver_activate(GtkWidget *widget, gpointer data)
 
 void on_aboutdialog_activate_link(GtkAboutDialog *label, gchar* uri, gpointer data)
 {
-#ifdef _MSYS
+#ifdef _WIN32
   ShellExecuteA(
       NULL,
       "open",
