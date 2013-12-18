@@ -360,7 +360,7 @@ void refreshConnectDialog()
   }
   rootTable = gtk_table_new(
       g_robotManager->numEntries()*3,
-      9,
+      10,
       FALSE);
   /* For each Mobot entry, we need to compose a set of child widgets and attach
    * them to the right places on the grid */
@@ -589,6 +589,28 @@ void refreshConnectDialog()
         }
       }
     }
+    /* Maybe add an "Upgrade Firmware" button */
+    if( (g_robotManager->getMobotIndex(i) != NULL) &&
+        (g_robotManager->getMobotIndex(i)->connectStatus == RMOBOT_CONNECTED) &&
+        (g_robotManager->getMobotIndex(i)->firmwareVersion < Mobot_protocolVersion()) ) 
+    {
+      int form=0;
+      Mobot_getFormFactor((mobot_t*)g_robotManager->getMobotIndex(i), &form);
+      GdkColor color;
+      gdk_color_parse("yellow", &color);
+      w = gtk_button_new_with_label("Upgrade\nFirmware");
+      gtk_widget_modify_bg(w, GTK_STATE_NORMAL, &color);
+      gdk_color_parse("#FFFF22", &color);
+      gtk_widget_modify_bg(w, GTK_STATE_PRELIGHT, &color);
+      gtk_widget_show(w);
+      gtk_table_attach( GTK_TABLE(rootTable),
+          w,
+          7, 8,
+          i*3, (i*3)+2,
+          GTK_FILL, GTK_FILL,
+          2, 2);
+      g_signal_connect(G_OBJECT(w), "clicked", G_CALLBACK(on_button_updateFirmware_clicked), GINT_TO_POINTER(i));
+    }
     /* Add an "Info" button */
     if( (g_robotManager->getMobotIndex(i) != NULL) &&
         (g_robotManager->getMobotIndex(i)->connectStatus == RMOBOT_CONNECTED)
@@ -598,7 +620,7 @@ void refreshConnectDialog()
       gtk_widget_show(w);
       gtk_table_attach( GTK_TABLE(rootTable),
           w,
-          7, 8,
+          8, 9,
           i*3, (i*3)+2,
           GTK_FILL, GTK_FILL,
           2, 2);
@@ -609,7 +631,7 @@ void refreshConnectDialog()
     gtk_widget_show(w);
     gtk_table_attach( GTK_TABLE(rootTable),
         w,
-        0, 8,
+        0, 9,
         i*3+2, (i*3)+3,
         GTK_FILL, GTK_FILL,
         2, 2);
