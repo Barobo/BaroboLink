@@ -20,10 +20,11 @@
 #include "split.hpp"
 #include "arraylen.h"
 
-#include <stdlib.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cctype>
+#include <cstring>
+#include <cassert>
 #include <gtk/gtk.h>
-#include <string.h>
 #define PLAT_GTK 1
 #define GTK
 #ifdef __MACH__
@@ -73,7 +74,7 @@ const char *g_interfaceFiles[] = {
   "../share/BaroboLink/mobotfirmwareupdateinterface.glade"
 };
 
-const char* g_hexfilename;
+std::string g_hexfilename;
 
 #if 0
 void* findDongleWorkerThread(void* arg)
@@ -349,7 +350,7 @@ gboolean switch_to_p3_timeout(gpointer data)
       GTK_NOTEBOOK(gtk_builder_get_object(g_builder, "notebook1")));
   g_stkComms = new CStkComms();
   g_stkComms->connectWithTTY(g_comport);
-  g_stkComms->programAllAsync(g_hexfilename);
+  g_stkComms->programAllAsync(g_hexfilename.c_str());
 #ifndef _WIN32
   sleep(2);
 #else
@@ -397,30 +398,59 @@ void on_button_p2_yes_clicked(GtkWidget* widget, gpointer data)
   }
 
 #ifndef _WIN32
-  g_hexfilename = strdup("hexfiles/linkbot_latest.hex");
+  g_hexfilename = std::string("hexfiles/linkbot_latest.hex");
 #else
   /* Get the install path of BaroboLink from the registry */
   DWORD size;
-  char path[1024];
   HKEY key;
-  RegOpenKeyEx(
+  int rc;
+
+  rc = RegOpenKeyEx(
       HKEY_LOCAL_MACHINE,
       "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\BaroboLink.exe",
       0,
       KEY_QUERY_VALUE,
       &key);
 
-  RegQueryValueEx(
+  if (ERROR_SUCCESS != rc) {
+    GtkWidget* d = gtk_message_dialog_new(
+        GTK_WINDOW(gtk_builder_get_object(g_builder, "window1")),
+        GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_MESSAGE_ERROR,
+        GTK_BUTTONS_OK,
+	"Unable to find BaroboLink location in registry.\nTry re-installing BaroboLink.");
+    gtk_dialog_run(GTK_DIALOG(d));
+    return;
+  }
+
+  /* Find out how much memory to allocate. */
+  rc = RegQueryValueEx(
+      key,
+      "PATH",
+      NULL,
+      NULL,
+      NULL,
+      &size);
+  assert(ERROR_SUCCESS == rc);
+
+  /* hlh: FIXME this should probably be TCHAR instead, and we should support
+   * unicode or whatever */
+  char* path = new char [size + 1];
+
+  rc = RegQueryValueEx(
       key,
       "PATH",
       NULL,
       NULL,
       (LPBYTE)path,
       &size);
+  assert(ERROR_SUCCESS == rc);
+
   path[size] = '\0';
 
-  strcat(path, "\\hexfiles\\linkbot_latest.hex");
-  g_hexfilename = strdup(path);
+  g_hexfilename = std::string(path) + "\\hexfiles\\linkbot_latest.hex";
+  delete [] path;
+  path = NULL;
 #endif
  
 #if 0 
@@ -428,7 +458,7 @@ void on_button_p2_yes_clicked(GtkWidget* widget, gpointer data)
   g_hexfilename = gtk_file_chooser_get_filename(
       GTK_FILE_CHOOSER(gtk_builder_get_object(g_builder, "filechooserbutton_hexfile")));
 #endif
-  if(!fileExists(g_hexfilename)) {
+  if(!fileExists(g_hexfilename.c_str())) {
     /* Pop up a warning dialog and abort */
     GtkWidget* d = gtk_message_dialog_new(
         GTK_WINDOW(gtk_builder_get_object(g_builder, "window1")),
@@ -436,7 +466,7 @@ void on_button_p2_yes_clicked(GtkWidget* widget, gpointer data)
         GTK_MESSAGE_ERROR,
         GTK_BUTTONS_OK,
         "File \"%s\" does not exist. \nPlease select a valid hex file to flash to the Linkbot.",
-        g_hexfilename);
+        g_hexfilename.c_str());
     int rc = gtk_dialog_run(GTK_DIALOG(d));
     return;
   }
