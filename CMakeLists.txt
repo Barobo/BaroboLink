@@ -4,7 +4,7 @@ project(BaroboLink)
 
 add_subdirectory(libstkcomms)
 #add_subdirectory(libbarobo)
-exec_program(cat ARGS "\"${CMAKE_SOURCE_DIR}/VERSION.TXT\"" OUTPUT_VARIABLE barobolink_version)
+exec_program(cat ARGS "\"${PROJECT_SOURCE_DIR}/VERSION.TXT\"" OUTPUT_VARIABLE barobolink_version)
 add_definitions(-DBAROBOLINK_VERSION=${barobolink_version})
 message("Configuring BaroboLink version " ${barobolink_version})
 
@@ -60,13 +60,14 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 #include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
 #include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile/mxml-2.7)
 include_directories(${LIBSTKCOMMS_SOURCE_DIR})
-include_directories(${CMAKE_INSTALL_PREFIX}/include)
+#include_directories(${CMAKE_INSTALL_PREFIX}/include)
 link_directories(${LIBSTKCOMMS_BINARY_DIR})
 link_directories(${GTK2_LIBRARY_DIRS})
 link_directories(${PYTHON_LIBRARY_DIRS})
 #link_directories(${CMAKE_SOURCE_DIR}/libbarobo)
 #link_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
-link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+#link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+include_directories(${LIBBAROBO_INCLUDE_DIRS})
 
 set(BAROBOLINK_SRCS
     commsHandler.cpp
