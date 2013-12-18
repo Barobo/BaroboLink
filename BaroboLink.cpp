@@ -331,14 +331,17 @@ void initialize()
   initializeComms();
 
   /* Try to connect to a DOF dongle if possible */
-  const char *dongle;
+  char dongle[64];
   int i, rc;
   GtkLabel* l = GTK_LABEL(gtk_builder_get_object(g_builder, "label_connectDongleCurrentPort"));
+#if 0
   for(
       i = 0, dongle = g_robotManager->getDongle(i); 
       dongle != NULL; 
       i++, dongle = g_robotManager->getDongle(i)
      ) 
+#endif
+  if (-1 != Mobot_dongleGetTTY(dongle, ARRAYLEN(dongle)))
   {
     g_mobotParent = (recordMobot_t*)malloc(sizeof(recordMobot_t));
     RecordMobot_init(g_mobotParent, "DONGLE");
@@ -347,7 +350,7 @@ void initialize()
       printf("(barobo) INFO: Dongle connected on %s\n", dongle);
       Mobot_setDongleMobot((mobot_t*)g_mobotParent);
       gtk_label_set_text(l, dongle);
-      break;
+      //break;
     } 
   }
   if(rc) {
