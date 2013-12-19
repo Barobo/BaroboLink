@@ -67,7 +67,8 @@ link_directories(${PYTHON_LIBRARY_DIRS})
 #link_directories(${CMAKE_SOURCE_DIR}/libbarobo)
 #link_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
 #link_directories(${CMAKE_INSTALL_PREFIX}/lib)
-include_directories(${LIBBAROBO_INCLUDE_DIRS})
+find_path(BAROBO_INC mobot.h HINTS ${LIBBAROBO_INCLUDE_DIRS})
+include_directories(${BAROBO_INC})
 
 set(BAROBOLINK_SRCS
     commsHandler.cpp
