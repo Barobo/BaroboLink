@@ -65,7 +65,10 @@ link_directories(${PYTHON_LIBRARY_DIRS})
 find_path(BAROBO_INC mobot.h HINTS ${LIBBAROBO_INCLUDE_DIRS})
 include_directories(${BAROBO_INC})
 
-if(NOT TARGET barobo)
+# Find libbarobo itself, if it isn't a CMake target.
+if(TARGET barobo)
+  set(BAROBO barobo)
+else()
   find_library(BAROBO barobo)
 endif()
 
