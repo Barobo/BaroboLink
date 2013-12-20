@@ -37,7 +37,7 @@
 #endif
 #include "libstkcomms.hpp"
 #include "command.h"
-#include "../thread_macros.h"
+#include "thread_macros.h"
 
 //#ifdef DEBUG
 //#define THROW throw

@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+# BaroboLink Robot Communications Application
+# Barobo, Inc.
+
+cmake_minimum_required(VERSION 2.8.9)
 
 project(BaroboLink)
 
 add_subdirectory(libstkcomms)
-#add_subdirectory(libbarobo)
 exec_program(cat ARGS "\"${PROJECT_SOURCE_DIR}/VERSION.TXT\"" OUTPUT_VARIABLE barobolink_version)
 add_definitions(-DBAROBOLINK_VERSION=${barobolink_version})
 message("Configuring BaroboLink version " ${barobolink_version})
@@ -13,12 +15,11 @@ if(CMAKE_HOST_WIN32)
   pkg_check_modules(GTK2 REQUIRED gtk+-2.0)
   #pkg_check_modules(PYTHON REQUIRED python)
   #find_package(PythonLibs 2.7 REQUIRED python)
-  # FIXME relative path hack
   if(NOT WINSDK_INCLUDE_PATH)
-    include("libbarobo/findwindowssdk.cmake")
+    include("findwindowssdk.cmake")
   endif(NOT WINSDK_INCLUDE_PATH)
   if(NOT MSVC_INCLUDE_PATH)
-    include("libbarobo/findmsvc.cmake")
+    include("findmsvc.cmake")
   endif(NOT MSVC_INCLUDE_PATH)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -idirafter \"${WINSDK_INCLUDE_PATH}\" -idirafter \"${MSVC_INCLUDE_PATH}\"")
@@ -55,60 +56,53 @@ endif(NOT GTK2_FOUND)
 
 include_directories(${GTK2_INCLUDE_DIRS})
 include_directories(${PYTHON_INCLUDE_DIRS})
-# For Scintilla
-#include_directories(${CMAKE_SOURCE_DIR}/libbarobo)
-#include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
-#include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile/mxml-2.7)
 include_directories(${LIBSTKCOMMS_SOURCE_DIR})
-#include_directories(${CMAKE_INSTALL_PREFIX}/include)
 link_directories(${LIBSTKCOMMS_BINARY_DIR})
 link_directories(${GTK2_LIBRARY_DIRS})
 link_directories(${PYTHON_LIBRARY_DIRS})
-#link_directories(${CMAKE_SOURCE_DIR}/libbarobo)
-#link_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
-#link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+
+# Find libbarobo's interface and library.
 find_path(BAROBO_INC mobot.h HINTS ${LIBBAROBO_INCLUDE_DIRS})
 include_directories(${BAROBO_INC})
 
-set(BAROBOLINK_SRCS
-    commsHandler.cpp
-    configFile.cpp
-    connectDialog.cpp
-    connectDongleDialog.cpp
-    controlDialog.cpp
-    RecordMobot.cpp
-    BaroboLink.cpp
-    RobotManager.cpp
-    scanMobotsDialog.cpp
-    teachingDialog.cpp
-    updateFirmware.cpp)
+if(NOT TARGET barobo)
+  find_library(BAROBO barobo)
+endif()
 
-set(BAROBOFIRMWAREUPDATE_SRCS BaroboFirmwareUpdate.cpp)
+##############################################################################
 
-add_executable(BaroboLink ${BAROBOLINK_SRCS})
-add_executable(BaroboFirmwareUpdate ${BAROBOFIRMWAREUPDATE_SRCS})
+set(BAROBOLINK_SOURCES
+    src/commsHandler.cpp
+    src/configFile.cpp
+    src/connectDialog.cpp
+    src/connectDongleDialog.cpp
+    src/controlDialog.cpp
+    src/RecordMobot.cpp
+    src/BaroboLink.cpp
+    src/RobotManager.cpp
+    src/scanMobotsDialog.cpp
+    src/teachingDialog.cpp
+    src/updateFirmware.cpp)
+
+set(BAROBOFIRMWAREUPDATE_SOURCES src/BaroboFirmwareUpdate.cpp)
+
+add_executable(BaroboLink ${BAROBOLINK_SOURCES})
+add_executable(BaroboFirmwareUpdate ${BAROBOFIRMWAREUPDATE_SOURCES})
+
+target_link_libraries(BaroboLink ${BAROBO} stkcomms pthread)
+target_link_libraries(BaroboFirmwareUpdate ${BAROBO} stkcomms)
 
 if(CMAKE_HOST_WIN32)
-  target_link_libraries(BaroboLink barobo stkcomms pthread
-      ${CMAKE_SOURCE_DIR}/BaroboLink.res
-      ${PYTHON_LIBRARIES}
-      ${GTK2_LIBRARIES})
-  target_link_libraries(BaroboFirmwareUpdate barobo stkcomms 
-      ${GTK2_LIBRARIES})
+  target_link_libraries(BaroboLink ${CMAKE_SOURCE_DIR}/BaroboLink.res ${PYTHON_LIBRARIES} ${GTK2_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate ${GTK2_LIBRARIES})
 elseif(APPLE)
   find_library(COREFOUNDATION_LIB CoreFoundation)
   find_library(IOKIT_LIB IOKit)
-  target_link_libraries(BaroboLink barobo stkcomms pthread
-      ${IOKIT_LIB} ${COREFOUNDATION_LIB}
-      ${PYTHON_LIBRARIES}
-      ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
-  target_link_libraries(BaroboFirmwareUpdate barobo stkcomms pthread
-      ${IOKIT_LIB} ${COREFOUNDATION_LIB}
-      ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
+  target_link_libraries(BaroboLink ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${PYTHON_LIBRARIES} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
 else()
-  target_link_libraries(BaroboLink barobo stkcomms bluetooth pthread 
-      ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES})
-  target_link_libraries(BaroboFirmwareUpdate barobo stkcomms bluetooth pthread ${GTK2_LIBRARIES})
+  target_link_libraries(BaroboLink bluetooth ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate bluetooth pthread ${GTK2_LIBRARIES})
   install(TARGETS BaroboLink BaroboFirmwareUpdate
           RUNTIME DESTINATION bin)
   install(FILES 
@@ -126,7 +120,6 @@ else()
       interface/inch_left.svg
       interface/inch_right.svg
       interface/interface.glade
-      #interface/interfacepatch.patch
       interface/lface_forward.svg
       interface/mobotfirmwareupdateinterface.glade
       interface/move_back.png
@@ -158,27 +151,27 @@ if(CMAKE_SYSTEM_NAME MATCHES [Ll]inux)
        set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${PROJECT_VERSION}-${CPACK_DEBIAN_PACKAGE_REVISION}_${CMAKE_SYSTEM_NAME}")
   endif(DPKG_PROGRAM)
 
-  INCLUDE (InstallRequiredSystemLibraries)
+  include(InstallRequiredSystemLibraries)
 
-  SET (CPACK_SET_DESTDIR "on")
-  SET (CPACK_PACKAGE_NAME "BaroboLink")
-  SET (CPACK_PACKAGING_INSTALL_PREFIX "/tmp")
-  SET (CPACK_GENERATOR "DEB")
+  set(CPACK_SET_DESTDIR "on")
+  set(CPACK_PACKAGE_NAME "BaroboLink")
+  set(CPACK_PACKAGING_INSTALL_PREFIX "/tmp")
+  set(CPACK_GENERATOR "DEB")
 
-  SET (VERSION 1.5.4)
-  SET (CPACK_DEBIAN_PACKAGE_VERSION ${VERSION})
-  SET (CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-  SET (CPACK_DEBIAN_PACKAGE_SECTION "Science & Engineering")
-  SET (CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+  set(VERSION 1.5.4)
+  set(CPACK_DEBIAN_PACKAGE_VERSION ${VERSION})
+  set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+  set(CPACK_DEBIAN_PACKAGE_SECTION "Science & Engineering")
+  set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 #SET (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libgladeui-1-11, libglib2.0-0, libgtk2.0-0")
-  set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+  set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
-  SET (CPACK_PACKAGE_DESCRIPTION "Barobo Robot Controller")
-  SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Graphical Interface for controlling, programming, and interacting with Barobo Mobots and Linkbots.")
-  SET (CPACK_PACKAGE_CONTACT "david@barobo.com")
-  SET (CPACK_DEBIAN_PACKAGE_MAINTAINER "David Ko <david@barobo.com>")
-  SET (CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+  set(CPACK_PACKAGE_DESCRIPTION "Barobo Robot Controller")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Graphical Interface for controlling, programming, and interacting with Barobo Mobots and Linkbots.")
+  set(CPACK_PACKAGE_CONTACT "david@barobo.com")
+  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "David Ko <david@barobo.com>")
+  set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 
-  SET (CPACK_COMPONENTS_ALL Libraries ApplicationData)
-  INCLUDE (CPack)
+  set(CPACK_COMPONENTS_ALL Libraries ApplicationData)
+  include(CPack)
 endif()

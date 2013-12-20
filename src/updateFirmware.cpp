@@ -23,7 +23,7 @@
 #include <mobot.h>
 #include "BaroboLink.h"
 #include "RecordMobot.h"
-#include "libstkcomms/libstkcomms.hpp"
+#include "libstkcomms.hpp"
 
 recordMobot_t* g_reflashMobot;
 int g_reflashMobotIndex;

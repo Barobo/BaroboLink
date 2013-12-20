@@ -32,7 +32,7 @@
 #include "libstkcomms.hpp"
 #include "libstkcomms.h"
 #include "command.h"
-#include "../thread_macros.h"
+#include "thread_macros.h"
 
 //#define DEBUG
 

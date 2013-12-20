@@ -19,7 +19,7 @@ typedef struct bdaddr_s {
 void baswap(bdaddr_t *dst, const bdaddr_t *src);
 int str2ba(const char *str, bdaddr_t *ba);
 #endif
-#include "../thread_macros.h"
+#include "thread_macros.h"
 #include "libstkcomms.h"
 
 class CHexFile
