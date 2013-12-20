@@ -86,6 +86,9 @@ set(BAROBOLINK_SOURCES
     src/scanMobotsDialog.cpp
     src/teachingDialog.cpp
     src/updateFirmware.cpp)
+if(CMAKE_HOST_WIN32)
+  list(APPEND BAROBOLINK_SOURCES BaroboLink.res)
+endif()
 
 set(BAROBOFIRMWAREUPDATE_SOURCES src/BaroboFirmwareUpdate.cpp)
 
@@ -95,20 +98,7 @@ add_executable(BaroboFirmwareUpdate ${BAROBOFIRMWAREUPDATE_SOURCES})
 target_link_libraries(BaroboLink ${BAROBO} stkcomms pthread)
 target_link_libraries(BaroboFirmwareUpdate ${BAROBO} stkcomms)
 
-if(CMAKE_HOST_WIN32)
-  target_link_libraries(BaroboLink ${CMAKE_SOURCE_DIR}/BaroboLink.res ${PYTHON_LIBRARIES} ${GTK2_LIBRARIES})
-  target_link_libraries(BaroboFirmwareUpdate ${GTK2_LIBRARIES})
-elseif(APPLE)
-  find_library(COREFOUNDATION_LIB CoreFoundation)
-  find_library(IOKIT_LIB IOKit)
-  target_link_libraries(BaroboLink ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${PYTHON_LIBRARIES} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
-  target_link_libraries(BaroboFirmwareUpdate pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
-else()
-  target_link_libraries(BaroboLink bluetooth ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES})
-  target_link_libraries(BaroboFirmwareUpdate bluetooth pthread ${GTK2_LIBRARIES})
-  install(TARGETS BaroboLink BaroboFirmwareUpdate
-          RUNTIME DESTINATION bin)
-  install(FILES 
+set(INTERFACE_FILES
       interface/16px_move_back.png
       interface/16px_move_back.svg
       interface/16px_move_forward.png
@@ -134,12 +124,24 @@ else()
       interface/rotate_right.png
       interface/rotate_right.svg
       interface/stop.png
-      interface/stop.svg
-      DESTINATION share/BaroboLink)
-  install(FILES
-      BaroboLink.desktop 
-      DESTINATION share/applications
-      )
+      interface/stop.svg)
+
+install(FILES ${INTERFACE_FILES} DESTINATION share/BaroboLink)
+install(TARGETS BaroboLink BaroboFirmwareUpdate RUNTIME DESTINATION bin)
+
+if(CMAKE_HOST_WIN32)
+  #target_link_libraries(BaroboLink ${PROJECT_SOURCE_DIR}/BaroboLink.res ${PYTHON_LIBRARIES} ${GTK2_LIBRARIES})
+  target_link_libraries(BaroboLink ${PYTHON_LIBRARIES} ${GTK2_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate ${GTK2_LIBRARIES})
+elseif(APPLE)
+  find_library(COREFOUNDATION_LIB CoreFoundation)
+  find_library(IOKIT_LIB IOKit)
+  target_link_libraries(BaroboLink ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${PYTHON_LIBRARIES} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES})
+else()
+  target_link_libraries(BaroboLink bluetooth ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES})
+  target_link_libraries(BaroboFirmwareUpdate bluetooth pthread ${GTK2_LIBRARIES})
+  install(FILES BaroboLink.desktop DESTINATION share/applications)
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES [Ll]inux)

@@ -40,7 +40,7 @@
 #include "thread_macros.h"
 
 #ifdef _WIN32
-#include "libbarobo/win32_error.h"
+#include "win32_error.h"
 #include <windows.h>
 #include <shellapi.h>
 #include <dbt.h>
