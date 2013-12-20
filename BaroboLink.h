@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 /* Global Funcs */
-void initialize();
+gboolean initialize(gpointer data);
 int getIterModelFromTreeSelection(GtkTreeView *treeView, GtkTreeModel **model, GtkTreeIter *iter);
 
 /* Global Vars */

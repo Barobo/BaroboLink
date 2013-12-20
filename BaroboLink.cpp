@@ -279,8 +279,6 @@ int main(int argc, char* argv[])
     g_warning("Could not find interface file.");
     return -1;
   }
-  /* Initialize the subsystem */
-  initialize();
 
   /* Get the main window */
   g_window = GTK_WIDGET( gtk_builder_get_object(g_builder, "window1"));
@@ -305,6 +303,8 @@ int main(int argc, char* argv[])
   HDEVNOTIFY hNotify = registerForDeviceChanges();
 #endif
 
+  /* Initialize the subsystem */
+  g_timeout_add(100, initialize, NULL);
   gtk_main();
 
 #ifdef _WIN32
@@ -314,7 +314,7 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-void initialize()
+gboolean initialize(gpointer data)
 {
   g_mobotParent = NULL;
   g_robotManager = new CRobotManager();
@@ -356,6 +356,7 @@ void initialize()
   if(rc) {
     gtk_label_set_text(l, "Not connected");
   }
+  return false;
 }
 
 int getIterModelFromTreeSelection(GtkTreeView *treeView, GtkTreeModel **model, GtkTreeIter *iter)
