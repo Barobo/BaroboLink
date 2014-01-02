@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 2.6)
 
 project(LIBSTKCOMMS)
 
-find_path(BAROBO_INC thread_macros.h HINTS ${LIBBAROBO_INCLUDE_DIRS})
-include_directories(${BAROBO_INC})
+find_package(LIBBAROBO)
+include_directories(${LIBBAROBO_INCLUDE_DIRS})
 
 if(CMAKE_HOST_WIN32)
   # FIXME hack--put these cmake scripts in a proper place (we need a

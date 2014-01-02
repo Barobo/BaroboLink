@@ -61,16 +61,8 @@ link_directories(${LIBSTKCOMMS_BINARY_DIR})
 link_directories(${GTK2_LIBRARY_DIRS})
 link_directories(${PYTHON_LIBRARY_DIRS})
 
-# Find libbarobo's interface and library.
-find_path(BAROBO_INC mobot.h HINTS ${LIBBAROBO_INCLUDE_DIRS})
-include_directories(${BAROBO_INC})
-
-# Find libbarobo itself, if it isn't a CMake target.
-if(TARGET barobo)
-  set(BAROBO barobo)
-else()
-  find_library(BAROBO barobo)
-endif()
+find_package(LIBBAROBO)
+include_directories(${LIBBAROBO_INCLUDE_DIRS})
 
 ##############################################################################
 
@@ -95,8 +87,8 @@ set(BAROBOFIRMWAREUPDATE_SOURCES src/BaroboFirmwareUpdate.cpp)
 add_executable(BaroboLink ${BAROBOLINK_SOURCES})
 add_executable(BaroboFirmwareUpdate ${BAROBOFIRMWAREUPDATE_SOURCES})
 
-target_link_libraries(BaroboLink ${BAROBO} stkcomms pthread)
-target_link_libraries(BaroboFirmwareUpdate ${BAROBO} stkcomms)
+target_link_libraries(BaroboLink ${LIBBAROBO_LIBRARIES} stkcomms pthread)
+target_link_libraries(BaroboFirmwareUpdate ${LIBBAROBO_LIBRARIES} stkcomms)
 
 set(INTERFACE_FILES
       interface/16px_move_back.png
