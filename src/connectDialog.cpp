@@ -17,7 +17,8 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 #include <gtk/gtk.h>
 #include "BaroboLink.h"
 #include "thread_macros.h"

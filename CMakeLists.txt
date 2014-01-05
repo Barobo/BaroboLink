@@ -44,7 +44,7 @@ elseif(APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch i386")
   include_directories(${GTKMAC_INCLUDE_DIRS})
   link_directories(${GTKMAC_LIBRARY_DIRS})
-else(CMAKE_HOST_WIN32)
+else()  # linux
   set(GTK2_ADDITIONAL_SUFFIXES)
   find_package(GTK2 2.6 REQUIRED gtk glade )
 #find_package(PythonLibs 2.7 REQUIRED python)
@@ -89,6 +89,12 @@ add_executable(BaroboFirmwareUpdate ${BAROBOFIRMWAREUPDATE_SOURCES})
 
 target_link_libraries(BaroboLink ${LIBBAROBO_LIBRARIES} stkcomms pthread)
 target_link_libraries(BaroboFirmwareUpdate ${LIBBAROBO_LIBRARIES} stkcomms)
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+# connectDialog.cpp uses cstdint, off64_t MinGW bug requires gnu++11 instead
+# of c++11
+  set_target_properties(BaroboLink PROPERTIES COMPILE_FLAGS "-std=gnu++11")
+endif()
 
 set(INTERFACE_FILES
       interface/16px_move_back.png
