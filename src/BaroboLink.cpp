@@ -46,7 +46,7 @@
 #include <dbt.h>
 #include <initguid.h>   // must be included before ddk/*, otherwise link error
                         // (because that makes complete sense)
-#include <ddk/usbiodef.h>
+//#include <ddk/usbiodef.h>
 #include <tchar.h>
 #include <gdk/gdkwin32.h>
 #endif
