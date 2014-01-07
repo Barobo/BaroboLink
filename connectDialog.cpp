@@ -17,6 +17,7 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <gtk/gtk.h>
 #include "BaroboLink.h"
