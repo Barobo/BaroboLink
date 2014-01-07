@@ -174,10 +174,16 @@ static HDEVNOTIFY registerForDeviceChanges () {
 
   /* Now that we have our top-level window handle, we can replace its WindowProc
    * with our own to intercept WM_DEVICECHANGE messages. */
+  SetLastError(0);
   g_oldWindowProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)windowProc);
+  /* There is a possibility that SetWindowLongPtr can return 0 and yet not have
+   * experienced an error. Thus, we have to check both the return value and the
+   * value of GetLastError() */
   if (!g_oldWindowProc) {
-    win32_error("SetWindowLongPtr", GetLastError());
-    exit(1);
+    if(GetLastError()) {
+      win32_error("SetWindowLongPtr", GetLastError());
+      exit(1);
+    }
   }
 
   DEV_BROADCAST_DEVICEINTERFACE filter = { 0 };
