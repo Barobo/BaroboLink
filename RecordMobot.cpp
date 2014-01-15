@@ -180,7 +180,7 @@ int RecordMobot_getChMotionString(recordMobot_t* mobot, int index, char* buf)
       }
       break;
     case MOTION_SLEEP:
-      sprintf(buf, "delay(%.2lf);", (mobot->motions[index]->data.sleepDuration));
+      sprintf(buf, "%s.delaySeconds(%.2lf);", mobot->name, (mobot->motions[index]->data.sleepDuration));
       break;
   }
 	return 0;
@@ -215,7 +215,7 @@ int RecordMobot_getChMotionStringB(recordMobot_t* mobot, int index, char* buf)
       }
       break;
     case MOTION_SLEEP:
-      sprintf(buf, "delay(%.2lf);", (mobot->motions[index]->data.sleepDuration));
+      sprintf(buf, "%s.delaySeconds(%.2lf);", mobot->name, (mobot->motions[index]->data.sleepDuration));
       break;
   }
 	return 0;
