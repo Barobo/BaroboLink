@@ -5,7 +5,9 @@ cmake_minimum_required(VERSION 2.8.9)
 
 project(BaroboLink)
 
+add_subdirectory(../libbarobo libbarobo)
 add_subdirectory(libstkcomms)
+
 exec_program(cat ARGS "\"${PROJECT_SOURCE_DIR}/VERSION.TXT\"" OUTPUT_VARIABLE barobolink_version)
 add_definitions(-DBAROBOLINK_VERSION=${barobolink_version})
 message("Configuring BaroboLink version " ${barobolink_version})
