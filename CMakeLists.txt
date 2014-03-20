@@ -92,7 +92,7 @@ if(CMAKE_HOST_WIN32)
       ${LIBBAROBO_LIBRARIES}
       ${CMAKE_SOURCE_DIR}/BaroboLink.res
       ${GTK2_LIBRARIES} 
-      ${PYTHON_LIBRARIES}
+      #${PYTHON_LIBRARIES}
       pthread
       setupapi
       sfp)
