@@ -17,7 +17,7 @@
    along with BaroboLink.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WINVER 0x0501
+//#define WINVER 0x0501
 #include <stdio.h>
 #include <stdlib.h>
 #include "BaroboLink.h"
