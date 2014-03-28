@@ -122,6 +122,7 @@ File "dlls\libpangowin32-1.0-0.dll"
 File "dlls\libpng14-14.dll"
 File "dlls\libstdc++-6.dll"
 File "dlls\libwinpthread-1.dll"
+File "dlls\zlib1.dll"
 # Files for Linkbot Firmware Rescue
 SetOutPath "$INSTDIR\LinkbotFirmwareRescue"
 File "${FIRMUP_DIR}\LinkbotFirmwareRescue.exe"
