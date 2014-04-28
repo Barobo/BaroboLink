@@ -23,7 +23,8 @@
 #include <mobot.h>
 #include "BaroboLink.h"
 #include "RecordMobot.h"
-#include "libstkcomms/libstkcomms.hpp"
+#include <libstkcomms.hpp>
+#include "thread_macros.h"
 
 recordMobot_t* g_reflashMobot;
 int g_reflashMobotIndex;
@@ -205,7 +206,7 @@ gboolean reflashConnectTimeout(gpointer data)
 #else
       sprintf(filename, "hexfiles/rev3.hex");
 #endif
-      g_stkComms->programAllAsync(filename, 3);
+      g_stkComms->programAllAsync(std::string(filename), 3);
     } else if (g_reflashHWRev == 4) {
 #ifdef __MACH__
       datadir = getenv("XDG_DATA_DIRS");

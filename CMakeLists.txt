@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(BaroboLink)
 
-add_subdirectory(../libstkcomms libstkcomms)
+#add_subdirectory(../libstkcomms libstkcomms)
 add_subdirectory(../libbarobo libbarobo)
 exec_program(cat ARGS "\"${CMAKE_SOURCE_DIR}/VERSION.TXT\"" OUTPUT_VARIABLE barobolink_version)
 add_definitions(-DBAROBOLINK_VERSION=${barobolink_version})
@@ -61,7 +61,7 @@ include_directories(${LIBBAROBO_SOURCE_DIR}/src)
 #include_directories(${CMAKE_SOURCE_DIR}/libbarobo)
 #include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile)
 #include_directories(${CMAKE_SOURCE_DIR}/libbarobo/BaroboConfigFile/mxml-2.7)
-include_directories(${LIBSTKCOMMS_SOURCE_DIR})
+include_directories(${LIBSTKCOMMS_SOURCE_DIR}/include)
 link_directories(${LIBSTKCOMMS_BINARY_DIR})
 link_directories(${GTK2_LIBRARY_DIRS})
 link_directories(${PYTHON_LIBRARY_DIRS})
@@ -88,7 +88,7 @@ if(CMAKE_HOST_WIN32)
   target_link_libraries(
       BaroboLink
       stkcomms 
-      baroboStatic
+      barobo
       ${LIBBAROBO_LIBRARIES}
       ${CMAKE_SOURCE_DIR}/BaroboLink.res
       ${GTK2_LIBRARIES} 
@@ -104,11 +104,11 @@ if(CMAKE_HOST_WIN32)
 elseif(APPLE)
   find_library(COREFOUNDATION_LIB CoreFoundation)
   find_library(IOKIT_LIB IOKit)
-  target_link_libraries(BaroboLink baroboStatic stkcomms pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES} ${PYTHON_LIBRARIES} )
-#  target_link_libraries(BaroboFirmwareUpdate baroboStatic stkcomms pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES} )
+  target_link_libraries(BaroboLink barobo stkcomms pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES} ${PYTHON_LIBRARIES} )
+#  target_link_libraries(BaroboFirmwareUpdate barobo stkcomms pthread ${IOKIT_LIB} ${COREFOUNDATION_LIB} ${GTK2_LIBRARIES} ${GTKMAC_LIBRARIES} )
 else()
-  target_link_libraries(BaroboLink baroboStatic stkcomms pthread bluetooth ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES} )
-#  target_link_libraries(BaroboFirmwareUpdate baroboStatic stkcomms pthread ${GTK2_LIBRARIES} )
+  target_link_libraries(BaroboLink barobo stkcomms pthread bluetooth ${GTK2_LIBRARIES} ${PYTHON_LIBRARIES} )
+#  target_link_libraries(BaroboFirmwareUpdate barobo stkcomms pthread ${GTK2_LIBRARIES} )
   install(TARGETS BaroboLink 
           RUNTIME DESTINATION bin )
   install(FILES 
