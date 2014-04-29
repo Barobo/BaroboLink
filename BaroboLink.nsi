@@ -98,6 +98,7 @@ Section -MainProgram
 ${INSTALL_TYPE}
 SetOverwrite ifnewer
 SetOutPath "$INSTDIR"
+File /r "hexfiles"
 File "build\BaroboLink.exe"
 File "build\libbarobo\libsfp\libsfp.dll"
 File "build\libbarobo\libstkcomms\libstkcomms.dll"
@@ -216,14 +217,6 @@ File "..\libbarobo\docs\barobo.pdf"
 File "..\libbarobo\docs\index.html"
 File "..\libbarobo\docs\Barobo.png"
 File "ChangeLog"
-SetOutPath "$INSTDIR\hexfiles"
-File "hexfiles\linkbot_68.hex"
-File "hexfiles\linkbot_75.hex"
-File "hexfiles\linkbot_76.hex"
-File "hexfiles\linkbot_latest.hex"
-File "hexfiles\rev3.hex"
-File "hexfiles\rev3_safe.hex"
-File "hexfiles\rev4.hex"
 
 # Install the Ch package
 # First, figure out if Ch in installed already.
