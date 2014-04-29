@@ -100,6 +100,7 @@ SetOverwrite ifnewer
 SetOutPath "$INSTDIR"
 File "build\BaroboLink.exe"
 File "build\libbarobo\libsfp\libsfp.dll"
+File "build\libbarobo\libstkcomms\libstkcomms.dll"
 File "build\libbarobo\libbarobo.dll"
 File "dlls\freetype6.dll"
 File "dlls\intl.dll"
