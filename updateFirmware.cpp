@@ -83,7 +83,9 @@ void on_button_robotInfo_clicked(GtkWidget* widget, gpointer data)
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "entry_robotID"));
   gtk_entry_set_text(GTK_ENTRY(w), g_robotManager->getEntry(index));
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "entry_firmwareVersion"));
-  sprintf(buf, "%d", Mobot_getVersion((mobot_t*)mobot));
+  unsigned int version;
+  Mobot_getVersions((mobot_t*)mobot, &version);
+  sprintf(buf, "%d.%d.%d", (version>>16)&0xff, (version>>8)&0xff, version&0xff);
   gtk_entry_set_text(GTK_ENTRY(w), buf);
   if(mobot->firmwareVersion < Mobot_protocolVersion()) {
     gtk_widget_show(
