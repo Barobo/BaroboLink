@@ -96,7 +96,7 @@ InstallDir "$PROGRAMFILES\BaroboLink"
 
 Section -MainProgram
 ${INSTALL_TYPE}
-SetOverwrite ifnewer
+SetOverwrite on
 SetOutPath "$INSTDIR"
 File /r "hexfiles"
 File "build\BaroboLink.exe"
