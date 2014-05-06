@@ -648,6 +648,11 @@ void* controllerHandlerThread(void* arg)
       }
     }
     MUTEX_UNLOCK(&g_activeMobotLock);
+#ifdef _WIN32
+    Sleep(100);
+#else
+    usleep(100000);
+#endif
   }
 }
 
