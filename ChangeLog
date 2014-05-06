@@ -1,9 +1,23 @@
+BaroboLink 1.6.4
+    - Updated firmware: New firmware now uses exponential backoff for RF
+      transmissions that do not ack correctly. Should help in noisy 
+      environments or environments with many Linkbots.
+    - Updated libbarobo to play nice with new firmware. Increased timeout
+      to give robots a chance to backoff and ack properly.
+
+BaroboLink 1.6.3
+    - Bump
+
+BaroboLink 1.6.2
+    - Updated Robot Firmware
+    - Fixed missing DLL file
+
+Barobolink 1.6.1 (Maintenance release)
+    - Added missing dll files to installer
+
 BaroboLink 1.6.0
     - Updated serial protocol to use libsfp: A reliable p2p layer
     - Use Mobot_dongleGetTTY instead of config file
     - Moved initialization routines to a seperate timeout
     - Fixed some USB hotplug stuff
  
-Barobolink 1.6.1 (Maintenance release)
-    - Added missing dll files to installer
-

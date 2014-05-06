@@ -340,7 +340,7 @@
           <object class="GtkTable" id="table8">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="n_rows">4</property>
+            <property name="n_rows">5</property>
             <property name="n_columns">3</property>
             <child>
               <object class="GtkLabel" id="label55">
@@ -442,7 +442,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>
-                <property name="max_length">3</property>
+                <property name="max_length">10</property>
                 <property name="has_frame">False</property>
                 <property name="invisible_char">•</property>
                 <property name="width_chars">3</property>
@@ -453,7 +453,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
+                <property name="right_attach">3</property>
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
               </packing>
@@ -467,10 +467,9 @@
                 <property name="use_action_appearance">False</property>
               </object>
               <packing>
-                <property name="left_attach">2</property>
                 <property name="right_attach">3</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
               </packing>
             </child>
           </object>

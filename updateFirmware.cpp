@@ -23,7 +23,8 @@
 #include <mobot.h>
 #include "BaroboLink.h"
 #include "RecordMobot.h"
-#include "libstkcomms/libstkcomms.hpp"
+#include <libstkcomms.hpp>
+#include "thread_macros.h"
 
 recordMobot_t* g_reflashMobot;
 int g_reflashMobotIndex;
@@ -82,7 +83,9 @@ void on_button_robotInfo_clicked(GtkWidget* widget, gpointer data)
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "entry_robotID"));
   gtk_entry_set_text(GTK_ENTRY(w), g_robotManager->getEntry(index));
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "entry_firmwareVersion"));
-  sprintf(buf, "%d", Mobot_getVersion((mobot_t*)mobot));
+  unsigned int version;
+  Mobot_getVersions((mobot_t*)mobot, &version);
+  sprintf(buf, "%d.%d.%d", (version>>16)&0xff, (version>>8)&0xff, version&0xff);
   gtk_entry_set_text(GTK_ENTRY(w), buf);
   if(mobot->firmwareVersion < Mobot_protocolVersion()) {
     gtk_widget_show(
@@ -205,7 +208,7 @@ gboolean reflashConnectTimeout(gpointer data)
 #else
       sprintf(filename, "hexfiles/rev3.hex");
 #endif
-      g_stkComms->programAllAsync(filename, 3);
+      g_stkComms->programAllAsync(std::string(filename), 3);
     } else if (g_reflashHWRev == 4) {
 #ifdef __MACH__
       datadir = getenv("XDG_DATA_DIRS");

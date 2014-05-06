@@ -63,8 +63,11 @@ int RecordMobot_connectWithAddress(recordMobot_t* mobot, const char address[], i
     mobot->connectStatus = RMOBOT_NOT_CONNECTED;
     return rc;
   }
-  mobot->firmwareVersion = Mobot_getVersion((mobot_t*)mobot);
-    mobot->connectStatus = RMOBOT_CONNECTED;
+  //mobot->firmwareVersion = Mobot_getVersion((mobot_t*)mobot);
+  unsigned int version;
+  Mobot_getVersions((mobot_t*)mobot, &version);
+  mobot->firmwareVersion = version;
+  mobot->connectStatus = RMOBOT_CONNECTED;
   mobot->dirty = 1;
   return 0;
 }
