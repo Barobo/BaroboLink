@@ -43,6 +43,8 @@
 #define PORT "5768"
 #define BACKLOG 10
 
+int g_newConnectionDetected = 0;
+
 struct commsThread_s {
   int new_fd;
   recordMobot_t* mobot;
@@ -190,6 +192,7 @@ void* listenThread(void* arg)
       perror("accept");
       continue;
     }
+    g_newConnectionDetected = 1;
 
     /*
     inet_ntop(their_addr.ss_family,
@@ -232,6 +235,19 @@ void* listenThread(void* arg)
   return NULL;
 }
 
+gboolean newConnectionDetection(gpointer data)
+{
+    if(g_newConnectionDetected) {
+        /* Switch to the connect panel */
+        /* First, get the notebook */
+        GtkWidget* w = GTK_WIDGET(gtk_builder_get_object(g_builder,
+                    "notebook1"));
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(w), 0); 
+        g_newConnectionDetected = 0;
+    }
+    return TRUE;
+}
+
 int initializeComms(void)
 {
   /* Initialize Winsock */
@@ -245,4 +261,5 @@ int initializeComms(void)
   /* Just start the listenThread */
   THREAD_T thread;
   THREAD_CREATE(&thread, listenThread, NULL);
+  g_timeout_add(437, newConnectionDetection, NULL);
 }
