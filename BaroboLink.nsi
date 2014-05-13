@@ -8,7 +8,7 @@
 !define FIRMUP_APP_NAME "Barobo Firmware Update Utility"
 !define COMP_NAME "Barobo"
 !define WEB_SITE "http://www.barobo.com"
-!define SHORTVERSION "1.6.4"
+!define SHORTVERSION "1.6.5"
 !define VERSION "${SHORTVERSION}.00"
 !define COPYRIGHT "Barobo  © 2013"
 !define DESCRIPTION "Application"
@@ -96,7 +96,7 @@ InstallDir "$PROGRAMFILES\BaroboLink"
 
 Section -MainProgram
 ${INSTALL_TYPE}
-SetOverwrite ifnewer
+SetOverwrite on
 SetOutPath "$INSTDIR"
 File /r "hexfiles"
 File "build\BaroboLink.exe"
