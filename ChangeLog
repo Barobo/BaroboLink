@@ -1,3 +1,14 @@
+BaroboLink 1.6.6
+    - Fixed up a bunch of the acceleration functions
+    - Updated driver files
+
+BaroboLink 1.6.5
+    - Update firmware: Minor bugfixes
+    - Made BaroboLink automatically switch to the Connect dialog after a Ch
+      program connects
+    - Fixed bug in installer where it would sometimes not overwrite existing
+      files from previous BaroboLink installations.
+
 BaroboLink 1.6.4
     - Updated firmware: New firmware now uses exponential backoff for RF
       transmissions that do not ack correctly. Should help in noisy 
