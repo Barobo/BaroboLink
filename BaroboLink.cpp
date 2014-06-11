@@ -422,6 +422,46 @@ gboolean on_window1_delete_event(GtkWidget *w)
   g_timeout_add(500, exitTimeout, NULL);
 }
 
+void on_menuitem_changelog_activate(GtkWidget *widget, gpointer data)
+{
+    FILE *fp;
+    fp = fopen("docs/ChangeLog", "r");
+    if(fp == NULL) {
+        GtkWidget* d = gtk_message_dialog_new(
+            GTK_WINDOW(gtk_builder_get_object(g_builder, "window1")),
+            GTK_DIALOG_DESTROY_WITH_PARENT,
+            GTK_MESSAGE_ERROR,
+            GTK_BUTTONS_OK,
+            "Could not open the ChangeLog file.");
+        int rc = gtk_dialog_run(GTK_DIALOG(d));
+        return;
+    }
+    char *buffer;
+    size_t len;
+    fseek(fp, 0, SEEK_END);
+    len = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    buffer = (char*)malloc(len+1);
+    fread(buffer, 1, len, fp);
+    fclose(fp);
+    buffer[len] = '\0';
+    GtkWidget* d = GTK_WIDGET(gtk_builder_get_object(g_builder,
+        "dialog_changelog"));
+    GtkWidget* textview = GTK_WIDGET(gtk_builder_get_object(g_builder,
+        "textview_changelog"));
+    GtkTextBuffer* textbuffer =
+        gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
+    gtk_text_buffer_set_text(textbuffer, buffer, -1);
+    int rc = gtk_dialog_run(GTK_DIALOG(d));
+    free(buffer);
+    return;
+}
+
+void on_dialog_changelog_response(GtkWidget *widget, gint response_id, gpointer data)
+{
+    gtk_widget_hide(widget);
+}
+
 double normalizeAngleRad(double radians)
 {
   while(radians > M_PI) {
