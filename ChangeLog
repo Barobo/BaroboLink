@@ -1,3 +1,6 @@
+BaroboLink 1.6.7
+    - Added some new acceleration and movement functions, courtesy of Alex
+
 BaroboLink 1.6.6
     - Fixed up a bunch of the acceleration functions
     - Updated driver files
