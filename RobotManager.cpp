@@ -409,7 +409,7 @@ string* CRobotManager::generateChProgram(bool looped, bool holdOnExit)
 
   if(holdOnExit) {
     for(i = 0; i < numConnected(); i++) {
-      sprintf(tbuf, "robot%d.setExitState(ROBOT_HOLD);\n", i+1);
+      sprintf(tbuf, "robot%d.holdJointsAtExit();\n", i+1);
       buf.assign(tbuf);
       *program += buf;
     }

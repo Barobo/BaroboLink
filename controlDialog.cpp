@@ -198,13 +198,13 @@ void initControlDialog(void)
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorPos4"));
   gtk_range_set_range(GTK_RANGE(w), -180, 180);
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorspeed1"));
-  gtk_range_set_range(GTK_RANGE(w), 0, 120);
+  gtk_range_set_range(GTK_RANGE(w), -120, 120);
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorspeed2"));
-  gtk_range_set_range(GTK_RANGE(w), 0, 120);
+  gtk_range_set_range(GTK_RANGE(w), -120, 120);
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorspeed3"));
-  gtk_range_set_range(GTK_RANGE(w), 0, 120);
+  gtk_range_set_range(GTK_RANGE(w), -120, 120);
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_motorspeed4"));
-  gtk_range_set_range(GTK_RANGE(w), 0, 120);
+  gtk_range_set_range(GTK_RANGE(w), -120, 120);
 
   w = GTK_WIDGET(gtk_builder_get_object(g_builder, "vscale_accelx"));
   gtk_range_set_range(GTK_RANGE(w), -5, 5);
@@ -376,8 +376,13 @@ gboolean controllerHandlerTimeout(gpointer data)
     rc = Mobot_getFormFactor((mobot_t*)g_activeMobot, &form);
     w = GTK_WIDGET(gtk_builder_get_object(g_builder, "image_jointDiagram"));
     for(i = 0; i < 4; i++) {
-      gtk_range_set_range(GTK_RANGE(vscale_motorspeed[i]), 0, rad2deg(g_activeMobot->mobot.maxSpeed[0]));
-      sprintf(buf, "Joint Speed([0, %.0lf] deg/sec)", rad2deg(g_activeMobot->mobot.maxSpeed[0]));
+      gtk_range_set_range(GTK_RANGE(vscale_motorspeed[i]), 
+        -rad2deg(g_activeMobot->mobot.maxSpeed[0]),
+        rad2deg(g_activeMobot->mobot.maxSpeed[0]));
+      sprintf(buf, "Joint Speed([%.0lf, %.0lf] deg/sec)", 
+        -rad2deg(g_activeMobot->mobot.maxSpeed[0]),
+        rad2deg(g_activeMobot->mobot.maxSpeed[0])
+        );
       gtk_label_set_text(
           GTK_LABEL(gtk_builder_get_object(g_builder, "label_jointSpeed")),
           buf);
