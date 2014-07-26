@@ -15,10 +15,10 @@ if(CMAKE_HOST_WIN32)
   #find_package(PythonLibs 2.7 REQUIRED python)
   # FIXME relative path hack
   if(NOT WINSDK_INCLUDE_PATH)
-    include("libbarobo/findwindowssdk.cmake")
+    include("${LIBBAROBO_SOURCE_DIR}/findwindowssdk.cmake")
   endif(NOT WINSDK_INCLUDE_PATH)
   if(NOT MSVC_INCLUDE_PATH)
-    include("libbarobo/findmsvc.cmake")
+    include("${LIBBAROBO_SOURCE_DIR}/findmsvc.cmake")
   endif(NOT MSVC_INCLUDE_PATH)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -idirafter \"${WINSDK_INCLUDE_PATH}\" -idirafter \"${MSVC_INCLUDE_PATH}\"")
