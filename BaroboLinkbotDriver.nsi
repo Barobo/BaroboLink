@@ -28,7 +28,7 @@ VIAddVersionKey "FileVersion"  "${VERSION}"
 
 ######################################################################
 
-SetCompressor ZLIB
+SetCompressor BZIP2
 Name "${APP_NAME}"
 Caption "${APP_NAME}"
 OutFile "${INSTALLER_NAME}"
@@ -68,8 +68,8 @@ RequestExecutionLevel admin
 
 Section "Install Linkbot Driver" SectionDriver
     SetOutPath $TEMP
-    File "Barobo_Linkbot_Driver.inf"
-    File "barobo_linkbot_driver.cat"
+    File "Barobo_Linkbot_Driver\Barobo_Linkbot_Driver.inf"
+    File "Barobo_Linkbot_Driver\barobo_linkbot_driver.cat"
     File "Barobo_Linkbot_Driver\dpinst_x86.exe"
     File "Barobo_Linkbot_Driver\dpinst_x64.exe"
 #ExecWait '$SYSDIR\pnputil.exe -f -a "$TEMP\Barobo_Linkbot_Driver.inf" > C:\Users\dko\junk1 2>&1' $1
