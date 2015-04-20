@@ -70,7 +70,7 @@ void* commsThread(void* arg)
   /* Receive messages 1 byte at a time until the entire message is received */
   int err;
   uint8_t byte;
-  uint8_t buf[100];
+  uint8_t buf[256];
   int bytes = 0; int datasize = 100;
   while(1) {
     bytes = 0; datasize = 100;
